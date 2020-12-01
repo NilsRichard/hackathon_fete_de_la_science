@@ -9,9 +9,7 @@ class DataBase {
   }
 
   Stream<QuerySnapshot> getNEventsStream(int n) {
-    return eventCollection
-        .limit(n)
-        .snapshots();
+    return eventCollection.limit(n).snapshots();
   }
 }
 
@@ -27,9 +25,10 @@ class Event {
   String locationId;
   GeoPoint location;
 
-  String theme;
+  List<String> theme;
   String title;
 
+  bool registrationNeeded;
   String openAgendaLink;
   String registrationEmail;
   String registrationPhone;

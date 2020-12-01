@@ -26,6 +26,9 @@ dependencies:
 
   validators: ^2.0.1
   provider: ^2.0.0
+
+  # eventinfoscreen dependencies
+  url_launcher: ^5.7.10
   
   # Add the dependency for the Firebase Core Flutter SDK
   firebase_core: "^0.5.2"
@@ -52,8 +55,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+      - images/empty.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

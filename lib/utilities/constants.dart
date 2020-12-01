@@ -27,3 +27,7 @@ final kBoxDecorationStyle = BoxDecoration(
     ),
   ],
 );
+
+final double normalFontSize = 14;
+final double title1FontSize = 25;
+final double title2FontSize = 16;

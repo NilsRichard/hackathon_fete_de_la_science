@@ -15,7 +15,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final _events = DataBase().getEventsStream();
 
-  Widget _buildEvent(Map<String, dynamic> event) {
+  Widget _buildEvent(Map<String, dynamic> event, String eventId) {
     var title = event['title'] != null ? event['title'] : 'noName event';
     var date = event['date_start'] != null ? event['date_start'] : null;
     var image =
@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
           context,
           MaterialPageRoute(
             builder: (context) => EventInfosScreen(
-              event: Event.fromJson(event),
+              event: Event.fromJson(event, eventId),
             ),
           ),
         )
@@ -55,7 +55,8 @@ class _HomePageState extends State<HomePage> {
                 padding: EdgeInsets.all(16.0),
                 itemCount: snapshot.data.docs.length,
                 itemBuilder: /*1*/ (context, i) {
-                  return _buildEvent(snapshot.data.docs[i].data());
+                  return _buildEvent(
+                      snapshot.data.docs[i].data(), snapshot.data.docs[i].id);
                 },
               );
             } else {

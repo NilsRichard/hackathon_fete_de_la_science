@@ -4,6 +4,9 @@ class DataBase {
   final CollectionReference eventCollection =
       FirebaseFirestore.instance.collection("programme");
 
+  final CollectionReference ratings =
+      FirebaseFirestore.instance.collection("ratings");
+
   Stream<QuerySnapshot> getEventsStream() {
     return eventCollection.snapshots();
   }
@@ -11,9 +14,44 @@ class DataBase {
   Stream<QuerySnapshot> getNEventsStream(int n) {
     return eventCollection.limit(n).snapshots();
   }
+
+  Stream<QuerySnapshot> getRating(String eventId) {
+    return ratings.where("event_id", isEqualTo: eventId).snapshots();
+  }
+
+  Future rateEvent(String userId, String eventId, double rate) {
+    var r = {
+      'user_id': userId,
+      'event_id': eventId,
+      'rate': rate,
+      'writtenDate': Timestamp.now().toDate()
+    };
+    return ratings
+        .where("event_id", isEqualTo: eventId)
+        .where("user_id", isEqualTo: userId)
+        .snapshots()
+        .first
+        .then((snap) => {
+              if (snap.size == 0)
+                {
+                  ratings
+                      .add(r)
+                      .then((value) => (value) => print('Event rated'))
+                      .catchError(
+                          (error) => print('Error wile rating ' + error))
+                }
+              else
+                snap.docs.first.reference
+                    .update(r)
+                    .then((e) => {print('Changed vote')})
+                    .catchError(
+                        (error) => print('Error wile changing vote ' + error))
+            });
+  }
 }
 
 class Event {
+  String id;
   List<DatesEvent> dates;
 
   String description;
@@ -39,7 +77,8 @@ class Event {
 // Empty constructor
   Event();
 
-  Event.fromJson(Map json) {
+  Event.fromJson(Map json, String id) {
+    this.id = id;
     this.dates = DatesEvent.fromDynamicList(json["dates"]);
     this.description = json["description"];
     this.descriptionLong = json['description_long'];

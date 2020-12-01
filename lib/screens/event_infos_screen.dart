@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hackathon_fete_de_la_science/components/loading_circle.dart';
 import 'package:hackathon_fete_de_la_science/components/menu_drawer.dart';
+import 'package:hackathon_fete_de_la_science/utilities/auth_service.dart';
 import 'package:hackathon_fete_de_la_science/utilities/constants.dart';
 import 'package:hackathon_fete_de_la_science/utilities/database.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -108,6 +111,43 @@ class EventInfosScreenState extends State<EventInfosScreen> {
     );
   }
 
+  Widget buildRating() {
+    return StreamBuilder<QuerySnapshot>(
+        stream: DataBase().getRating(widget.event.id),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return LoadingCircle();
+          } else {
+            if (snapshot.data.docs.length > 0) {
+              double total = 0;
+              snapshot.data.docs.forEach((element) {
+                total += element["rate"];
+              });
+              return Center(
+                child: StarRating(
+                  rating: total / snapshot.data.docs.length,
+                  totalRatings: snapshot.data.docs.length,
+                  onRatingChanged: (rating) => {
+                    DataBase().rateEvent(
+                        AuthService().getUser.email, widget.event.id, rating)
+                  },
+                ),
+              );
+            } else {
+              return Center(
+                child: StarRating(
+                  rating: 0,
+                  onRatingChanged: (rating) => {
+                    DataBase().rateEvent(
+                        AuthService().getUser.email, widget.event.id, rating)
+                  },
+                ),
+              );
+            }
+          }
+        });
+  }
+
   Widget buildTop() {
     ImageProvider<Object> image2 = widget.event.image != null
         ? NetworkImage(widget.event.image)
@@ -129,13 +169,7 @@ class EventInfosScreenState extends State<EventInfosScreen> {
           textAlign: TextAlign.center,
         ),
         SizedBox(height: 15.0),
-        Center(
-          child: StarRating(
-            rating: widget.event.rating,
-            onRatingChanged: (rating) =>
-                setState(() => widget.event.rating = rating),
-          ),
-        ),
+        buildRating(),
         SizedBox(height: 15.0),
         Padding(
             padding: EdgeInsets.symmetric(horizontal: 15),
@@ -196,9 +230,14 @@ class StarRating extends StatelessWidget {
   final double rating;
   final RatingChangeCallback onRatingChanged;
   final Color color;
+  final int totalRatings;
 
   StarRating(
-      {this.starCount = 5, this.rating = .0, this.onRatingChanged, this.color});
+      {this.starCount = 5,
+      this.rating = .0,
+      this.onRatingChanged,
+      this.color,
+      this.totalRatings = 0});
 
   Widget buildStar(BuildContext context, int index) {
     Icon icon;
@@ -227,9 +266,12 @@ class StarRating extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Row(
-        children:
-            new List.generate(starCount, (index) => buildStar(context, index)),
-        mainAxisAlignment: MainAxisAlignment.center);
+    List<Widget> ws =
+        new List.generate(starCount, (index) => buildStar(context, index));
+    ws.add(Text("(" +
+        totalRatings.toString() +
+        " note" +
+        (totalRatings > 1 ? "s)" : ")")));
+    return new Row(children: ws, mainAxisAlignment: MainAxisAlignment.center);
   }
 }

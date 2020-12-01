@@ -5,12 +5,11 @@ class DataBase {
       FirebaseFirestore.instance.collection("programme");
 
   Stream<QuerySnapshot> getEventsStream() {
-    return eventCollection.orderBy("date_start", descending: true).snapshots();
+    return eventCollection.snapshots();
   }
 
   Stream<QuerySnapshot> getNEventsStream(int n) {
     return eventCollection
-        .orderBy("date_start", descending: true)
         .limit(n)
         .snapshots();
   }

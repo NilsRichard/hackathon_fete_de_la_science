@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "995622130090",
+    "firebase_url": "https://hackathon-fete-de-la-science.firebaseio.com",
+    "project_id": "hackathon-fete-de-la-science",
+    "storage_bucket": "hackathon-fete-de-la-science.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:995622130090:android:ea6a82745a1bb7a0bf1bd3",
+        "android_client_info": {
+          "package_name": "com.example.hackathon_fete_de_la_science"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "995622130090-n3ksb443ss3qkb0dcfd8kej3amhlrmrs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-G2weEs3MAdRrKzdmwom2Ar8EE3Tebjo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "995622130090-n3ksb443ss3qkb0dcfd8kej3amhlrmrs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hackathon_fete_de_la_science/components/loading_circle.dart';
 import 'package:hackathon_fete_de_la_science/components/menu_drawer.dart';
+import 'package:hackathon_fete_de_la_science/screens/event_infos_screen.dart';
 import 'package:hackathon_fete_de_la_science/utilities/auth_service.dart';
 import 'package:hackathon_fete_de_la_science/utilities/constants.dart';
 import 'package:hackathon_fete_de_la_science/utilities/database.dart';
@@ -17,7 +18,8 @@ class _HomePageState extends State<HomePage> {
   Widget _buildEvent(Map<String, dynamic> event) {
     var title = event['title'] != null ? event['title'] : 'noName event';
     var date = event['date_start'] != null ? event['date_start'] : null;
-    var image = 'http://www.holo3.com/wp-content/uploads/2017/07/image-homme-anonyme.png';
+    var image =
+        'http://www.holo3.com/wp-content/uploads/2017/07/image-homme-anonyme.png';
     return ListTile(
       leading: CircleAvatar(
         radius: 20.0,
@@ -25,9 +27,19 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.transparent,
       ),
       title: Text(title),
-      subtitle: Text(date != null ? date.toDate().toString()
-                                  : "start date is unknown"
-      ),
+      subtitle: Text(
+          date != null ? date.toDate().toString() : "start date is unknown"),
+      onTap: () => {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EventInfosScreen(
+              event: Event.fromJson(event),
+            ),
+          ),
+        )
+      },
+      trailing: Icon(Icons.chevron_right),
     );
   }
 
@@ -69,7 +81,7 @@ class _HomePageState extends State<HomePage> {
             ),
             title: Text('Faites(fête) de la science'),
           ),
-          drawer: MyDrawer(),
+          endDrawer: MyDrawer(),
           body: TabBarView(
             children: [
               _buildSuggestions(),
@@ -80,5 +92,4 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
 }

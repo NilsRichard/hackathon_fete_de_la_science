@@ -25,7 +25,7 @@ class Event {
   String locationId;
   GeoPoint location;
 
-  List<String> theme;
+  List<String> themes;
   String title;
 
   bool registrationNeeded;
@@ -34,7 +34,50 @@ class Event {
   String registrationPhone;
   String registrationLink;
 
-  double rating; // à implémenter TODO
+  double rating; // TODO à implémenter
+
+// Empty constructor
+  Event();
+
+  Event.fromJson(Map json) {
+    this.dates = DatesEvent.fromDynamicList(json["dates"]);
+    this.description = json["description"];
+    this.descriptionLong = json['description_long'];
+    this.image = json['image'];
+
+    this.keywords = stringListFromDynamicList(json['keywords']);
+
+    this.locationId = json['location_id'];
+    this.location = json['location'];
+
+    this.themes = stringListFromDynamicList(json['themes']);
+
+    this.title = json['title'];
+
+    this.registrationNeeded = json['registration_required'];
+
+    this.openAgendaLink = json['link'];
+    this.registrationEmail = (json['registration_email'] != null
+        ? json['registration_email'][0]
+        : null);
+    this.registrationPhone = (json['registration_phone'] != null
+        ? json['registration_phone'][0]
+        : null);
+    this.registrationLink = (json['registration_link'] != null
+        ? json['registration_link'][0]
+        : null);
+
+    this.rating = 3.5; // TODO
+  }
+
+  static List<String> stringListFromDynamicList(List<dynamic> list) {
+    if (list == null) return null;
+    List<String> ret = [];
+    list.forEach((element) {
+      ret.add(element + "");
+    });
+    return ret;
+  }
 }
 
 class Location {
@@ -48,6 +91,20 @@ class Location {
 }
 
 class DatesEvent {
-  DateTime end;
-  DateTime start;
+  Timestamp end;
+  Timestamp start;
+
+  static List<DatesEvent> fromDynamicList(List<dynamic> list) {
+    if (list == null) return null;
+    List<DatesEvent> ret = [];
+    list.forEach((element) {
+      ret.add(DatesEvent.fromJson(element));
+    });
+    return ret;
+  }
+
+  DatesEvent.fromJson(Map json) {
+    this.end = json["end"];
+    this.start = json["start"];
+  }
 }

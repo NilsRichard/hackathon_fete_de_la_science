@@ -24,14 +24,14 @@ class EventInfosScreenState extends State<EventInfosScreen> {
   Widget buildInfoElement(Icon icon, String info, Function onPressed) {
     return Row(
       children: [
-        SizedBox(width: 50.0),
+        SizedBox(width: 25.0),
         IconButton(
           icon: icon,
           onPressed: onPressed,
         ),
-        SizedBox(width: 50.0),
+        SizedBox(width: 25.0),
         Text(
-          info,
+          info.length <= 30 ? info : info.substring(0, 30) + "...",
           style: TextStyle(
             fontSize: normalFontSize, // defined in utilities/constants.dart
           ),
@@ -126,6 +126,7 @@ class EventInfosScreenState extends State<EventInfosScreen> {
         Text(
           widget.event.title,
           style: TextStyle(fontSize: title1FontSize),
+          textAlign: TextAlign.center,
         ),
         SizedBox(height: 15.0),
         Center(
@@ -174,7 +175,7 @@ class EventInfosScreenState extends State<EventInfosScreen> {
       appBar: AppBar(
         title: Text('Fête de la Science'),
       ),
-      drawer: MyDrawer(),
+      endDrawer: MyDrawer(),
       body: ListView(
         children: [
           buildTop(),

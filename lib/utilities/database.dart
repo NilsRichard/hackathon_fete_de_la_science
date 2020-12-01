@@ -9,6 +9,42 @@ class DataBase {
   }
 
   Stream<QuerySnapshot> getNEventsStream(int n) {
-    return eventCollection.orderBy("date_start", descending: true).limit(n).snapshots();
+    return eventCollection
+        .orderBy("date_start", descending: true)
+        .limit(n)
+        .snapshots();
   }
+}
+
+class Event {
+  List<DatesEvent> dates;
+
+  String description;
+  String descriptionLong;
+
+  String image;
+  List<String> keywords;
+
+  String locationId;
+  GeoPoint location;
+
+  String theme;
+  String title;
+
+  double rating; // à implémenter TODO
+}
+
+class Location {
+  String id;
+  GeoPoint location;
+
+  String address;
+  String country;
+  String department;
+  String name;
+}
+
+class DatesEvent {
+  DateTime end;
+  DateTime start;
 }

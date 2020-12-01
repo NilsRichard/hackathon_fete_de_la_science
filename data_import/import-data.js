@@ -15,7 +15,7 @@ locations = new Map();
 for (const d of data.slice(0,30)) {
     let el = {};
     // debug
-    console.log(d.fields);
+    //console.log(d.fields);
     // add some data
     el.title = d.fields.titre_fr;
     el.description = d.fields.description_fr;
@@ -23,6 +23,40 @@ for (const d of data.slice(0,30)) {
     el.image = d.fields.image;
     el.image_thumb = d.fields.apercu;
     el.image_full = d.fields.image_source;
+    el.link = d.fields.lien;
+    el.link_canonical = d.fields.lien_canonique;
+    el.registration_required = d.fields.inscription_necessaire.toLowerCase() == "oui";
+    console.log(d.fields.inscription_necessaire, el.registration_required);
+    // parse registration links
+    if (d.fields.lien_d_inscription) {
+        for (const l of d.fields.lien_d_inscription.split(", ")) {
+            if (l.match(/[-. ]*([0-9][-. ]*){10}/)) {
+                phone = l.replace(/[-. ]/g, "");
+                console.log("=> PHONE:", phone);
+                if (!el.registration_phone) {
+                    el.registration_phone = [];
+                }
+                el.registration_phone.push(phone);
+            }
+            else if (l.includes("@")) {
+                console.log("=> EMAIL:", l);
+                if (!el.registration_email) {
+                    el.registration_email = [];
+                }
+                el.registration_email.push(l);
+            }
+            else if (l.includes("://")) {
+                console.log("=> LINK:", l);
+                if (!el.registration_link) {
+                    el.registration_link = [];
+                }
+                el.registration_link.push(l);
+            }
+            else {
+                throw "unknown registration link type: " + l;
+            }
+        }
+    }
     // parse location
     console.log(d.fields.geolocalisation);
     const [lat, lon] = d.fields.geolocalisation;
@@ -59,7 +93,8 @@ for (const d of data.slice(0,30)) {
         el.themes = d.fields.thematiques.split("|");
     }
 
-    console.log(el);
+    //console.log(el);
+    Object.keys(el).forEach(key => el[key] === undefined ? delete el[key] : {});
     db.collection("programme").doc(d.fields.identifiant).set(el)
         .then(function() { console.log("success event", d.fields.identifiant); })
         .catch(function(error) { console.log("error:", error); });
@@ -68,7 +103,7 @@ for (const d of data.slice(0,30)) {
 
 for (const l of locations) {
     Object.keys(l[1]).forEach(key => l[1][key] === undefined ? delete l[1][key] : {});
-    console.log(l);
+    //console.log(l);
     db.collection("locations").doc(l[0]).set(l[1])
         .then(function() { console.log("success location",l[0]); })
         .catch(function(error) { console.log("error:", error); });

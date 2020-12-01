@@ -31,6 +31,11 @@ class Event {
   String theme;
   String title;
 
+  String openAgendaLink;
+  String registrationEmail;
+  String registrationPhone;
+  String registrationLink;
+
   double rating; // à implémenter TODO
 }
 

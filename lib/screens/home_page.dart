@@ -12,30 +12,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _tweets = DataBase().getTweetsStream();
-  final _formKey = GlobalKey<FormState>();
-  String _content;
+  final _events = DataBase().getEventsStream();
 
-  Future<void> tweet() async {
-    var user = AuthService().getUser;
-    final form = _formKey.currentState;
-    form.save();
-    if (form.validate()) {
-      print("$_content");
-      if (_content != null) {
-        print('tweeting');
-        DataBase().uploadTweet(user.displayName, _content, user.photoURL);
-        form.reset();
-      }
-    }
-  }
-
-  Widget _buildRow(Map<String, dynamic> tweet) {
-    var title = tweet['pseudo'] != null ? tweet['pseudo'] : 'oups';
-    var content = tweet['contenu'] != null ? tweet['contenu'] : 'oups';
-    var image = tweet['urlPhoto'] != null
-        ? tweet['urlPhoto']
-        : 'http://www.holo3.com/wp-content/uploads/2017/07/image-homme-anonyme.png';
+  Widget _buildEvent(Map<String, dynamic> event) {
+    var title = event['title'] != null ? event['title'] : 'noName event';
+    var date = event['date_start'] != null ? event['date_start'] : null;
+    var image = 'http://www.holo3.com/wp-content/uploads/2017/07/image-homme-anonyme.png';
     return ListTile(
       leading: CircleAvatar(
         radius: 20.0,
@@ -43,30 +25,29 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.transparent,
       ),
       title: Text(title),
-      subtitle: Text(content),
+      subtitle: Text(date != null ? date.toDate().toString()
+                                  : "start date is unknown"
+      ),
     );
   }
 
   Widget _buildSuggestions() {
     return StreamBuilder<QuerySnapshot>(
-        stream: _tweets,
+        stream: _events,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return LoadingCircle();
           } else {
             if (snapshot.data.docs.length > 0) {
-              return ListView.separated(
+              return ListView.builder(
                 padding: EdgeInsets.all(16.0),
                 itemCount: snapshot.data.docs.length,
                 itemBuilder: /*1*/ (context, i) {
-                  return _buildRow(snapshot.data.docs[i].data());
-                },
-                separatorBuilder: (BuildContext context, int index) {
-                  return Divider();
+                  return _buildEvent(snapshot.data.docs[i].data());
                 },
               );
             } else {
-              return Center(child: Text('There is no tweet'));
+              return Center(child: Text('There are no events'));
             }
           }
         });
@@ -74,46 +55,30 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    MaterialApp tp2 = MaterialApp(
-      title: 'TWISTIC',
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('TWISTIC'),
-        ),
-        drawer: MyDrawer(),
-        body: Column(
-          children: [
-            Expanded(child: _buildSuggestions()),
-            Padding(
-              padding: EdgeInsets.all(20),
-              child: Form(
-                key: _formKey,
-                child: TextFormField(
-                  onSaved: (value) => _content = value,
-                  decoration: InputDecoration(
-                    // border: InputBorder.none,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        Icons.send,
-                        color: Colors.black,
-                      ),
-                      tooltip: 'Send a tweet',
-                      onPressed: () {
-                        print('trying to tweet');
-                        tweet();
-                      },
-                    ),
-                    hintText: 'What are you thinking ?',
-                    hintStyle: k2HintTextStyle,
-                  ),
-                ),
-              ),
+    return MaterialApp(
+      title: 'home',
+      home: DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              tabs: [
+                Text('Evenements', textScaleFactor: 1.5),
+                Text('Parcours', textScaleFactor: 1.5),
+              ],
             ),
-          ],
+            title: Text('Faites(fête) de la science'),
+          ),
+          drawer: MyDrawer(),
+          body: TabBarView(
+            children: [
+              _buildSuggestions(),
+              Icon(Icons.directions_run),
+            ],
+          ),
         ),
       ),
     );
-
-    return tp2;
   }
+
 }

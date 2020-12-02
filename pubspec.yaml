@@ -29,11 +29,16 @@ dependencies:
 
   # eventinfoscreen dependencies
   url_launcher: ^5.7.10
+  fluttertoast: ^3.1.0
   
   # Add the dependency for the Firebase Core Flutter SDK
   firebase_core: "^0.5.2"
   firebase_auth: "^0.18.3"
   cloud_firestore: "^0.14.3"
+
+  # dependencies for the map
+  flutter_map: ^0.10.1
+  flutter_map_marker_cluster: ^0.3.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

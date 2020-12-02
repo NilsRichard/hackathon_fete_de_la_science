@@ -4,6 +4,12 @@ class DataBase {
   final CollectionReference eventCollection =
       FirebaseFirestore.instance.collection("programme");
 
+  final CollectionReference ratings =
+      FirebaseFirestore.instance.collection("ratings");
+
+  final CollectionReference parkours =
+      FirebaseFirestore.instance.collection("parkours");
+
   Stream<QuerySnapshot> getEventsStream() {
     return eventCollection.snapshots();
   }
@@ -11,9 +17,102 @@ class DataBase {
   Stream<QuerySnapshot> getNEventsStream(int n) {
     return eventCollection.limit(n).snapshots();
   }
+
+  Stream<QuerySnapshot> getEventsByTitle(String keywords) {
+    return eventCollection.where("title", isEqualTo: keywords).snapshots();
+  }
+
+  Stream<QuerySnapshot> getEventsByTheme(List<String> keywords) {
+    return eventCollection
+        .where("themes", arrayContainsAny: keywords)
+        .snapshots();
+  }
+
+  Stream<QuerySnapshot> getRating(String eventId) {
+    return ratings.where("event_id", isEqualTo: eventId).snapshots();
+  }
+
+  Stream<DocumentSnapshot> getEvent(String eventId) {
+    return eventCollection.doc(eventId).snapshots();
+  }
+
+  Future rateEvent(String userId, String eventId, double rate) {
+    var r = {
+      'user_id': userId,
+      'event_id': eventId,
+      'rate': rate,
+      'writtenDate': Timestamp.now().toDate()
+    };
+    return ratings
+        .where("event_id", isEqualTo: eventId)
+        .where("user_id", isEqualTo: userId)
+        .snapshots()
+        .first
+        .then((snap) => {
+              if (snap.size == 0)
+                ratings
+                    .add(r)
+                    .then((value) => (value) => print('Event rated'))
+                    .catchError((error) => print('Error wile rating ' + error))
+              else
+                snap.docs.first.reference
+                    .update(r)
+                    .then((e) => {print('Changed vote')})
+                    .catchError(
+                        (error) => print('Error wile changing vote ' + error))
+            });
+  }
+
+  Stream<QuerySnapshot> getMyParkours(String userId) {
+    return parkours.where("user_id", isEqualTo: userId).snapshots();
+  }
+
+  Future changeParkourTitle(String parkourId, String newTitle) {
+    return parkours.doc(parkourId).update({'title': newTitle});
+  }
+
+  Stream<QuerySnapshot> getParkourEvents(String parkourId) {
+    return parkours.doc(parkourId).collection("events").snapshots();
+  }
+
+  Stream<QuerySnapshot> getPublishedParkours() {
+    return parkours.where('published', isEqualTo: true).snapshots();
+  }
+
+  Future<DocumentReference> addParkour(String userId, String title) {
+    return parkours.add({
+      'user_id': userId,
+      'title': title,
+      'published': false,
+      'writtenDate': Timestamp.now().toDate()
+    });
+  }
+
+  Future addEventToParkour(String userId, String eventId, String parkourId) {
+    var p = {'event_id': eventId, 'writtenDate': Timestamp.now().toDate()};
+    return parkours
+        .doc(parkourId)
+        .collection("events")
+        .where("event_id", isEqualTo: eventId)
+        .snapshots()
+        .first
+        .then((snap) => {
+              if (snap.size == 0)
+                parkours
+                    .doc(parkourId)
+                    .collection("events")
+                    .add(p)
+                    .then((value) => (value) => print('Parkour added'))
+                    .catchError(
+                        (error) => print('Error wile adding parkour ' + error))
+              else
+                print("Already in parcours")
+            });
+  }
 }
 
 class Event {
+  String id;
   List<DatesEvent> dates;
 
   String description;
@@ -34,12 +133,11 @@ class Event {
   String registrationPhone;
   String registrationLink;
 
-  double rating; // TODO à implémenter
-
 // Empty constructor
   Event();
 
-  Event.fromJson(Map json) {
+  Event.fromJson(Map json, String id) {
+    this.id = id;
     this.dates = DatesEvent.fromDynamicList(json["dates"]);
     this.description = json["description"];
     this.descriptionLong = json['description_long'];
@@ -66,8 +164,6 @@ class Event {
     this.registrationLink = (json['registration_link'] != null
         ? json['registration_link'][0]
         : null);
-
-    this.rating = 3.5; // TODO
   }
 
   static List<String> stringListFromDynamicList(List<dynamic> list) {

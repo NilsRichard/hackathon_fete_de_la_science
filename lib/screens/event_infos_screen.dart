@@ -217,7 +217,15 @@ class EventInfosScreenState extends State<EventInfosScreen> {
       ),
       floatingActionButton: ElevatedButton(
         child: Text("Ajouter au parcours"),
-        onPressed: () => {print('Clicked')},
+        onPressed: () => {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) => ParkourChoser(
+              title: "Success",
+              eventId: widget.event.id,
+            ),
+          )
+        },
       ),
     );
   }
@@ -274,4 +282,110 @@ class StarRating extends StatelessWidget {
         (totalRatings > 1 ? "s)" : ")")));
     return new Row(children: ws, mainAxisAlignment: MainAxisAlignment.center);
   }
+}
+
+class ParkourChoser extends StatelessWidget {
+  final String title;
+  final String eventId;
+
+  ParkourChoser({
+    @required this.title,
+    @required this.eventId,
+  });
+
+  Widget _buildParkour(
+      Map<String, dynamic> parkour, String parkourId, String eventId) {
+    var title = parkour['title'] != null ? parkour['title'] : 'noName parkour';
+    var published = parkour['published'] != null ? parkour['published'] : false;
+    return ListTile(
+      leading: CircleAvatar(
+        radius: 20.0,
+        child: Text(title[0]),
+        backgroundColor: Colors.grey,
+      ),
+      title: Text(title),
+      subtitle: Text((published ? "publié" : "non publié")),
+      onTap: () => {
+        DataBase()
+            .addEventToParkour(AuthService().getUser.email, eventId, parkourId)
+      },
+      trailing: Icon(Icons.add),
+    );
+  }
+
+  Widget buildListParkours() {
+    return StreamBuilder<QuerySnapshot>(
+        stream: DataBase().getMyParkours(AuthService().getUser.email),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return LoadingCircle();
+          } else {
+            if (snapshot.data.docs.length > 0) {
+              return ListView.builder(
+                padding: EdgeInsets.all(16.0),
+                itemCount: snapshot.data.docs.length,
+                itemBuilder: /*1*/ (context, i) {
+                  return _buildParkour(snapshot.data.docs[i].data(),
+                      snapshot.data.docs[i].id, eventId);
+                },
+              );
+            } else {
+              return Center(child: Text("Vous n'avez pas encore de parcours"));
+            }
+          }
+        });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      elevation: 0.0,
+      backgroundColor: Colors.transparent,
+      child: Container(
+        padding: EdgeInsets.only(
+          top: Consts.avatarRadius + Consts.padding,
+          bottom: Consts.padding,
+          left: Consts.padding,
+          right: Consts.padding,
+        ),
+        margin: EdgeInsets.only(top: Consts.avatarRadius),
+        decoration: new BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.rectangle,
+          borderRadius: BorderRadius.circular(Consts.padding),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10.0,
+              offset: const Offset(0.0, 10.0),
+            ),
+          ],
+        ),
+        child: Column(children: [
+          RaisedButton(
+            child: Text("Ajouter dans un nouveau parcours"),
+            onPressed: () => {
+              DataBase().addParkour(AuthService().getUser.email, "title").then(
+                  (value) => {
+                        DataBase().addEventToParkour(
+                            AuthService().getUser.email, eventId, value.id)
+                      })
+            },
+          ),
+          SizedBox(height: 15.0),
+          Expanded(child: buildListParkours()),
+        ]),
+      ),
+    );
+  }
+}
+
+class Consts {
+  Consts._();
+
+  static const double padding = 16.0;
+  static const double avatarRadius = 66.0;
 }

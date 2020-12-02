@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hackathon_fete_de_la_science/components/loading_circle.dart';
 import 'package:hackathon_fete_de_la_science/components/menu_drawer.dart';
+import 'package:hackathon_fete_de_la_science/components/star_rating.dart';
 import 'package:hackathon_fete_de_la_science/utilities/auth_service.dart';
 import 'package:hackathon_fete_de_la_science/utilities/constants.dart';
 import 'package:hackathon_fete_de_la_science/utilities/database.dart';
@@ -161,7 +163,8 @@ class EventInfosScreenState extends State<EventInfosScreen> {
             height: 190.0,
             decoration: new BoxDecoration(
                 shape: BoxShape.circle,
-                image: new DecorationImage(fit: BoxFit.fill, image: image2))),
+                image:
+                    new DecorationImage(fit: BoxFit.fitHeight, image: image2))),
         SizedBox(height: 15.0),
         Text(
           widget.event.title,
@@ -223,6 +226,19 @@ class EventInfosScreenState extends State<EventInfosScreen> {
             builder: (BuildContext context) => ParkourChoser(
               title: "Success",
               eventId: widget.event.id,
+              onTapParkour: (String parkourId, String title) => {
+                DataBase().addEventToParkour(
+                    AuthService().getUser.email, widget.event.id, parkourId),
+                Navigator.of(context).pop(),
+                Fluttertoast.showToast(
+                  msg: "Évènement ajouté à " + title,
+                  toastLength: Toast.LENGTH_LONG,
+                  gravity:
+                      ToastGravity.BOTTOM, // also possible "TOP" and "CENTER"
+                  backgroundColor: Colors.green,
+                  textColor: Colors.white,
+                ),
+              },
             ),
           )
         },
@@ -231,89 +247,49 @@ class EventInfosScreenState extends State<EventInfosScreen> {
   }
 }
 
-typedef void RatingChangeCallback(double rating);
-
-class StarRating extends StatelessWidget {
-  final int starCount;
-  final double rating;
-  final RatingChangeCallback onRatingChanged;
-  final Color color;
-  final int totalRatings;
-
-  StarRating(
-      {this.starCount = 5,
-      this.rating = .0,
-      this.onRatingChanged,
-      this.color,
-      this.totalRatings = 0});
-
-  Widget buildStar(BuildContext context, int index) {
-    Icon icon;
-    if (index >= rating) {
-      icon = new Icon(
-        Icons.star_border,
-        color: Theme.of(context).buttonColor,
-      );
-    } else if (index > rating - 1 && index < rating) {
-      icon = new Icon(
-        Icons.star_half,
-        color: color ?? Theme.of(context).primaryColor,
-      );
-    } else {
-      icon = new Icon(
-        Icons.star,
-        color: color ?? Theme.of(context).primaryColor,
-      );
-    }
-    return new InkResponse(
-      onTap:
-          onRatingChanged == null ? null : () => onRatingChanged(index + 1.0),
-      child: icon,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    List<Widget> ws =
-        new List.generate(starCount, (index) => buildStar(context, index));
-    ws.add(Text("(" +
-        totalRatings.toString() +
-        " note" +
-        (totalRatings > 1 ? "s)" : ")")));
-    return new Row(children: ws, mainAxisAlignment: MainAxisAlignment.center);
-  }
-}
-
-class ParkourChoser extends StatelessWidget {
+class ParkourChoser extends StatefulWidget {
   final String title;
   final String eventId;
+  final Function(String parkourId, String title) onTapParkour;
 
   ParkourChoser({
     @required this.title,
     @required this.eventId,
+    @required this.onTapParkour,
   });
 
-  Widget _buildParkour(
-      Map<String, dynamic> parkour, String parkourId, String eventId) {
+  @override
+  ParkourChoserState createState() => ParkourChoserState();
+}
+
+class ParkourChoserState extends State<ParkourChoser> {
+  TextEditingController _c;
+  @override
+  initState() {
+    _c = new TextEditingController();
+    super.initState();
+  }
+
+  Widget _buildParkour(BuildContext context, Map<String, dynamic> parkour,
+      String parkourId, String eventId) {
     var title = parkour['title'] != null ? parkour['title'] : 'noName parkour';
     var published = parkour['published'] != null ? parkour['published'] : false;
     return ListTile(
-      leading: CircleAvatar(
-        radius: 20.0,
-        child: Text(title[0]),
-        backgroundColor: Colors.grey,
-      ),
       title: Text(title),
       subtitle: Text((published ? "publié" : "non publié")),
       onTap: () => {
-        DataBase()
-            .addEventToParkour(AuthService().getUser.email, eventId, parkourId)
+        widget.onTapParkour(parkourId, title),
       },
-      trailing: Icon(Icons.add),
+      trailing: IconButton(
+        icon: Icon(Icons.edit),
+        onPressed: () => {
+          updateName(parkourId),
+        },
+      ),
     );
   }
 
-  Widget buildListParkours() {
+  Widget buildListParkours(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
         stream: DataBase().getMyParkours(AuthService().getUser.email),
         builder: (context, snapshot) {
@@ -321,12 +297,14 @@ class ParkourChoser extends StatelessWidget {
             return LoadingCircle();
           } else {
             if (snapshot.data.docs.length > 0) {
-              return ListView.builder(
-                padding: EdgeInsets.all(16.0),
+              return ListView.separated(
                 itemCount: snapshot.data.docs.length,
                 itemBuilder: /*1*/ (context, i) {
-                  return _buildParkour(snapshot.data.docs[i].data(),
-                      snapshot.data.docs[i].id, eventId);
+                  return _buildParkour(context, snapshot.data.docs[i].data(),
+                      snapshot.data.docs[i].id, widget.eventId);
+                },
+                separatorBuilder: (BuildContext context, int index) {
+                  return Divider();
                 },
               );
             } else {
@@ -336,8 +314,7 @@ class ParkourChoser extends StatelessWidget {
         });
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget dialog(Widget child) {
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -346,12 +323,11 @@ class ParkourChoser extends StatelessWidget {
       backgroundColor: Colors.transparent,
       child: Container(
         padding: EdgeInsets.only(
-          top: Consts.avatarRadius + Consts.padding,
+          top: Consts.padding + 15,
           bottom: Consts.padding,
           left: Consts.padding,
           right: Consts.padding,
         ),
-        margin: EdgeInsets.only(top: Consts.avatarRadius),
         decoration: new BoxDecoration(
           color: Colors.white,
           shape: BoxShape.rectangle,
@@ -364,20 +340,99 @@ class ParkourChoser extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(children: [
-          RaisedButton(
-            child: Text("Ajouter dans un nouveau parcours"),
-            onPressed: () => {
-              DataBase().addParkour(AuthService().getUser.email, "title").then(
-                  (value) => {
-                        DataBase().addEventToParkour(
-                            AuthService().getUser.email, eventId, value.id)
-                      })
-            },
+        child: child,
+      ),
+    );
+  }
+
+  updateName(String parkourId) {
+    showDialog(
+        child: dialog(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                decoration:
+                    new InputDecoration(hintText: "Nouveau parcourstest"),
+                controller: _c,
+              ),
+              new FlatButton(
+                child: new Text("Valider"),
+                onPressed: () {
+                  DataBase().changeParkourTitle(parkourId, _c.text);
+                  Navigator.pop(context);
+                  _c.text = "";
+                },
+              )
+            ],
+          ),
+        ),
+        context: context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return dialog(
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Parcours",
+                style: TextStyle(
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(width: 15.0),
+              RawMaterialButton(
+                fillColor: Colors.green,
+                shape: CircleBorder(),
+                constraints: BoxConstraints.tightFor(
+                  width: 35.0,
+                  height: 35.0,
+                ),
+                child: Icon(
+                  Icons.add,
+                  color: Colors.white,
+                ),
+                onPressed: () => {
+                  DataBase()
+                      .addParkour(
+                          AuthService().getUser.email, "Nouveau parcours")
+                      .then(
+                        (value) => {
+                          DataBase().addEventToParkour(
+                              AuthService().getUser.email,
+                              widget.eventId,
+                              value.id),
+                          updateName(value.id),
+                        },
+                      ),
+                },
+              ),
+            ],
           ),
           SizedBox(height: 15.0),
-          Expanded(child: buildListParkours()),
-        ]),
+          Container(
+            height: 250,
+            child: Scrollbar(
+              child: buildListParkours(context),
+            ),
+          ),
+          SizedBox(height: 15.0),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: FlatButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // To close the dialog
+              },
+              child: Text("Annuler"),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -387,5 +442,4 @@ class Consts {
   Consts._();
 
   static const double padding = 16.0;
-  static const double avatarRadius = 66.0;
 }

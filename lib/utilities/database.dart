@@ -61,6 +61,10 @@ class DataBase {
     return parkours.where("user_id", isEqualTo: userId).snapshots();
   }
 
+  Future changeParkourTitle(String parkourId, String newTitle) {
+    return parkours.doc(parkourId).update({'title': newTitle});
+  }
+
   Future<DocumentReference> addParkour(String userId, String title) {
     return parkours.add({
       'user_id': userId,

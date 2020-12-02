@@ -29,6 +29,7 @@ dependencies:
 
   # eventinfoscreen dependencies
   url_launcher: ^5.7.10
+  fluttertoast: ^3.1.0
   
   # Add the dependency for the Firebase Core Flutter SDK
   firebase_core: "^0.5.2"

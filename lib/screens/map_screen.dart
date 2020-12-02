@@ -5,7 +5,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:hackathon_fete_de_la_science/utilities/database.dart';
 import 'package:latlong/latlong.dart';
-import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -32,7 +31,6 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  Geoflutterfire geo;
   MapController mapController;
   var popupController = PopupController();
 
@@ -46,16 +44,11 @@ class _MapScreenState extends State<MapScreen> {
 
     print("map_screen -> initState");
 
-    geo = Geoflutterfire();
     mapController = MapController();
 
     var _firestore = FirebaseFirestore.instance;
 
-    var collectionReference = _firestore.collection('locations');
-    /* stream = geo.collection(collectionRef: DataBase().eventCollection).within(
-        center: geo.point(latitude: 48.11198, longitude: -1.67429),
-        radius: 100,
-        field: "location"); */
+    var collectionReference = _firestore.collection('locations_test');
     stream = collectionReference.snapshots().map((qusn) => qusn.docs);
     stream.listen((List<DocumentSnapshot> documentList) {
       print("listen");
@@ -99,7 +92,6 @@ class _MapScreenState extends State<MapScreen> {
   
   void _updateMarkers(List<DocumentSnapshot> documentList) {
     documentList.forEach((document) {
-      final GeoPoint point = document.data()['location'];
       print("marker:" + document.data()['name']);
       final _marker = OurMarker(document: document);
       setState(() {

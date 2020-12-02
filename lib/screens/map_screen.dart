@@ -1,11 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
-import 'package:hackathon_fete_de_la_science/utilities/database.dart';
 import 'package:latlong/latlong.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 LatLng gpToLl(GeoPoint gp) {
@@ -63,9 +61,9 @@ class _MapScreenState extends State<MapScreen> {
         body: FlutterMap(
           mapController: mapController,
           options: MapOptions(
-              plugins: <MapPlugin>[PopupMarkerPlugin()],
+              plugins: <MapPlugin>[MarkerClusterPlugin()],
               center: LatLng(48.11198, -1.67429),
-              zoom: 13.0
+              zoom: 6.0
           ),
           layers: [
             TileLayerOptions(
@@ -73,17 +71,35 @@ class _MapScreenState extends State<MapScreen> {
               urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
               subdomains: ['a', 'b', 'c']
             ),
-            PopupMarkerLayerOptions(
+            MarkerClusterLayerOptions(
+              maxClusterRadius: 100,
+              size: Size(40, 40),
+              fitBoundsOptions: FitBoundsOptions(
+                padding: EdgeInsets.all(50),
+              ),
               markers: List<Marker>.of(markers.values),
-              popupController: popupController,
-              popupBuilder: (_, Marker marker) {
-                if (marker is OurMarker) {
-                  return Card(child: Text(marker.document.data()["name"]));
+              polygonOptions: PolygonOptions(
+                borderColor: Colors.blueAccent,
+                color: Colors.black12,
+                borderStrokeWidth: 3,
+              ),
+              builder: (context, markers) {
+                return FloatingActionButton(
+                    child: Text(markers.length.toString()),
+                    onPressed: null,
+                );
+              },
+              popupOptions: PopupOptions(
+                popupController: popupController,
+                popupBuilder: (_, Marker marker) {
+                  if (marker is OurMarker) {
+                    return Card(child: Text(marker.document.data()["name"]));
+                  }
+                  else {
+                    return Card(child: Text("???"));
+                  }
                 }
-                else {
-                  return Card(child: Text("???"));
-                }
-              }
+              )
             )
           ]
         )

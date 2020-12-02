@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:hackathon_fete_de_la_science/components/loading_circle.dart';
+import 'package:hackathon_fete_de_la_science/screens/event_infos_screen.dart';
+import 'package:hackathon_fete_de_la_science/utilities/database.dart';
 import 'package:latlong/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -88,10 +91,32 @@ class _MapScreenState extends State<MapScreen> {
                 );
               },
               popupOptions: PopupOptions(
+                popupSnap: PopupSnap.top,
                 popupController: popupController,
                 popupBuilder: (_, Marker marker) {
                   if (marker is OurMarker) {
-                    return Card(child: Text(marker.document.data()["name"]));
+                    return Card(
+                        child: ConstrainedBox(
+                            constraints: BoxConstraints.loose(Size(300,290)),
+                            child: Column(
+
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(16),
+                                    child: Text(marker.document.data()["name"], style: TextStyle(fontSize: 16),),
+                                  ),
+                                  Expanded(
+                                      child:
+                                      _buildSuggestions(
+                                          DataBase().eventCollection
+                                              .where("location_id", isEqualTo: marker.document.id)
+                                              .snapshots()
+                                      )
+                                  )
+                                ]
+                            )
+                        )
+                    );
                   }
                   else {
                     return Card(child: Text("???"));
@@ -111,5 +136,58 @@ class _MapScreenState extends State<MapScreen> {
         markers[document.id] = _marker;
       });
     });
+  }
+
+
+  Widget _buildEvent(Map<String, dynamic> event, String eventId) {
+    Event ev = Event.fromJson(event, eventId);
+    return Card(
+      elevation: 2,
+      child: ListTile(
+        leading: CircleAvatar(
+          radius: 30.0,
+          child: Image.network(ev.image),
+          backgroundColor: Colors.transparent,
+        ),
+        title: Text(ev.title),
+        subtitle: Text(ev.description, maxLines: 2),
+        onTap: () => {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EventInfosScreen(
+                event: ev,
+              ),
+            ),
+          )
+        },
+        trailing: Icon(Icons.chevron_right),
+      ),
+    );
+  }
+
+
+  Widget _buildSuggestions(Stream<QuerySnapshot> eventStream) {
+    return StreamBuilder<QuerySnapshot>(
+        stream: eventStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return LoadingCircle();
+          } else {
+            if (snapshot.data.docs.length > 0) {
+              return ListView.builder(
+                //shrinkWrap: true,
+                padding: EdgeInsets.all(8.0),
+                itemCount: snapshot.data.docs.length,
+                itemBuilder: /*1*/ (context, i) {
+                  return _buildEvent(
+                      snapshot.data.docs[i].data(), snapshot.data.docs[i].id);
+                },
+              );
+            } else {
+              return Center(child: Text('There are no events'));
+            }
+          }
+        });
   }
 }

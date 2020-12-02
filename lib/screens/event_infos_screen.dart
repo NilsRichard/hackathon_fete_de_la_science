@@ -352,14 +352,14 @@ class ParkourChoserState extends State<ParkourChoser> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new TextField(
-                decoration:
-                    new InputDecoration(hintText: "Nouveau parcourstest"),
+                decoration: new InputDecoration(hintText: "Nouveau parcours"),
                 controller: _c,
               ),
               new FlatButton(
                 child: new Text("Valider"),
                 onPressed: () {
-                  DataBase().changeParkourTitle(parkourId, _c.text);
+                  DataBase().changeParkourTitle(parkourId,
+                      _c.text.isEmpty ? "Nouveau parcours" : _c.text);
                   Navigator.pop(context);
                   _c.text = "";
                 },

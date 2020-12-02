@@ -1,12 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hackathon_fete_de_la_science/screens/event_infos_screen.dart';
 import 'package:hackathon_fete_de_la_science/screens/map_screen.dart';
 import 'package:hackathon_fete_de_la_science/utilities/auth_service.dart';
-import 'package:hackathon_fete_de_la_science/utilities/constants.dart';
-import 'package:hackathon_fete_de_la_science/utilities/database.dart';
-import 'package:validators/validators.dart';
 
 class MyDrawer extends StatefulWidget {
   @override

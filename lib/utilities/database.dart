@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 
 class DataBase {
   final CollectionReference eventCollection =
@@ -19,11 +18,14 @@ class DataBase {
     return eventCollection.limit(n).snapshots();
   }
 
-  Stream<QuerySnapshot> getEventsByTitle(String keywords){
+  Stream<QuerySnapshot> getEventsByTitle(String keywords) {
     return eventCollection.where("title", isEqualTo: keywords).snapshots();
   }
-  Stream<QuerySnapshot> getEventsByTheme(List<String> keywords){
-    return eventCollection.where("themes", arrayContainsAny: keywords).snapshots();
+
+  Stream<QuerySnapshot> getEventsByTheme(List<String> keywords) {
+    return eventCollection
+        .where("themes", arrayContainsAny: keywords)
+        .snapshots();
   }
 
   Stream<QuerySnapshot> getRating(String eventId) {

@@ -1,11 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hackathon_fete_de_la_science/components/loading_circle.dart';
-import 'package:hackathon_fete_de_la_science/components/menu_drawer.dart';
 import 'package:hackathon_fete_de_la_science/screens/event_infos_screen.dart';
 import 'package:hackathon_fete_de_la_science/screens/search_form.dart';
-import 'package:hackathon_fete_de_la_science/utilities/auth_service.dart';
-import 'package:hackathon_fete_de_la_science/utilities/constants.dart';
 import 'package:hackathon_fete_de_la_science/utilities/database.dart';
 
 class EventHomePage extends StatefulWidget {
@@ -15,7 +12,7 @@ class EventHomePage extends StatefulWidget {
 
 class _EventHomePageState extends State<EventHomePage> {
   var _events = DataBase().getEventsStream();
-  void modifyEvents(Stream<QuerySnapshot> filteredEvents){
+  void modifyEvents(Stream<QuerySnapshot> filteredEvents) {
     setState(() {
       _events = filteredEvents;
     });
@@ -49,7 +46,7 @@ class _EventHomePageState extends State<EventHomePage> {
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -60,12 +57,8 @@ class _EventHomePageState extends State<EventHomePage> {
               child: SearchForm(runSearch: modifyEvents),
             ),
           ),
-          Flexible(
-              fit: FlexFit.loose,
-              child: _buildSuggestions()
-          ),
-        ]
-    );
+          Flexible(fit: FlexFit.loose, child: _buildSuggestions()),
+        ]);
   }
 
   Widget _buildSuggestions() {

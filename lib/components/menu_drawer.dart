@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hackathon_fete_de_la_science/screens/event_infos_screen.dart';
+import 'package:hackathon_fete_de_la_science/screens/map_screen.dart';
 import 'package:hackathon_fete_de_la_science/utilities/auth_service.dart';
 import 'package:hackathon_fete_de_la_science/utilities/database.dart';
 import 'package:validators/validators.dart';
@@ -25,6 +26,7 @@ class _MyDrawerState extends State<MyDrawer> {
               child: _buildAvatar(),
             ),
             _buildLogOutBtn(),
+            _buildMapBtn(),
             _buildBtn(),
           ],
         ),
@@ -80,6 +82,39 @@ class _MyDrawerState extends State<MyDrawer> {
       ),
     );
   }
+
+  Widget _buildMapBtn() {
+    return Container(
+      padding: EdgeInsets.all(25),
+      width: double.infinity,
+      child: RaisedButton(
+        elevation: 5.0,
+        onPressed: () => {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => MapScreen()),
+          )
+        },
+        padding: EdgeInsets.all(15.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+        color: Colors.white,
+        child: Text(
+          'Event map',
+          style: TextStyle(
+            color: Color(0xFF527DAA),
+            letterSpacing: 1.5,
+            fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'OpenSans',
+          ),
+        ),
+      ),
+    );
+  }
+
 
   Widget _buildBtn() {
     var event = new Event();

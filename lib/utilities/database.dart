@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class DataBase {
   final CollectionReference eventCollection =
@@ -6,6 +7,9 @@ class DataBase {
 
   final CollectionReference ratings =
       FirebaseFirestore.instance.collection("ratings");
+
+  final CollectionReference parkours =
+      FirebaseFirestore.instance.collection("parkours");
 
   Stream<QuerySnapshot> getEventsStream() {
     return eventCollection.snapshots();
@@ -33,19 +37,50 @@ class DataBase {
         .first
         .then((snap) => {
               if (snap.size == 0)
-                {
-                  ratings
-                      .add(r)
-                      .then((value) => (value) => print('Event rated'))
-                      .catchError(
-                          (error) => print('Error wile rating ' + error))
-                }
+                ratings
+                    .add(r)
+                    .then((value) => (value) => print('Event rated'))
+                    .catchError((error) => print('Error wile rating ' + error))
               else
                 snap.docs.first.reference
                     .update(r)
                     .then((e) => {print('Changed vote')})
                     .catchError(
                         (error) => print('Error wile changing vote ' + error))
+            });
+  }
+
+  Stream<QuerySnapshot> getMyParkours(String userId) {
+    return parkours.where("user_id", isEqualTo: userId).snapshots();
+  }
+
+  Future<DocumentReference> addParkour(String userId, String title) {
+    return parkours.add({
+      'user_id': userId,
+      'title': title,
+      'published': false,
+    });
+  }
+
+  Future addEventToParkour(String userId, String eventId, String parkourId) {
+    var p = {'event_id': eventId, 'writtenDate': Timestamp.now().toDate()};
+    return parkours
+        .doc(parkourId)
+        .collection("events")
+        .where("event_id", isEqualTo: eventId)
+        .snapshots()
+        .first
+        .then((snap) => {
+              if (snap.size == 0)
+                parkours
+                    .doc(parkourId)
+                    .collection("events")
+                    .add(p)
+                    .then((value) => (value) => print('Parkour added'))
+                    .catchError(
+                        (error) => print('Error wile adding parkour ' + error))
+              else
+                print("Already in parcours")
             });
   }
 }

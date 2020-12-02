@@ -14,7 +14,12 @@ class EventHomePage extends StatefulWidget {
 }
 
 class _EventHomePageState extends State<EventHomePage> {
-  final _events = DataBase().getEventsStream();
+  var _events = DataBase().getEventsStream();
+  void modifyEvents(Stream<QuerySnapshot> filteredEvents){
+    setState(() {
+      _events = filteredEvents;
+    });
+  }
 
   Widget _buildEvent(Map<String, dynamic> event, String eventId) {
     Event ev = Event.fromJson(event, eventId);
@@ -52,7 +57,7 @@ class _EventHomePageState extends State<EventHomePage> {
             flex: 0,
             child: Padding(
               padding: const EdgeInsets.only(bottom: 20.0),
-              child: SearchForm(),
+              child: SearchForm(runSearch: modifyEvents),
             ),
           ),
           Flexible(

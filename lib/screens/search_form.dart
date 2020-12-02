@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hackathon_fete_de_la_science/utilities/database.dart';
 
 //class used when the filter button has been clicked
 class FilteredSearchForm extends StatefulWidget {
@@ -73,7 +74,8 @@ class _FilteredSearchFormState extends State<FilteredSearchForm> {
 
 /// Class to make searches.
 class SearchForm extends StatefulWidget {
-  SearchForm({Key key}) : super(key: key);
+  final runSearch;
+  SearchForm({Key key, this.runSearch}) : super(key: key);
 
   @override
   _SearchFormState createState() => _SearchFormState();
@@ -85,6 +87,10 @@ class _SearchFormState extends State<SearchForm> {
 
   bool showFilters = false;
 
+  void _onSearchButtonPressed(){
+    widget.runSearch(DataBase().getEventsByTitle("La Sculpture Sonore"));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -95,26 +101,22 @@ class _SearchFormState extends State<SearchForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            TextFormField(
-              decoration: const InputDecoration(
-                hintText: 'Enter search',
-                suffixIcon: IconButton(
+            Stack(
+              alignment: Alignment.centerRight,
+              children: <Widget>[
+                TextFormField(
+                  decoration: const InputDecoration(
+                    hintText: 'Enter search',
+                  ),
+                ),
+                IconButton(
                   icon: Icon(
                     Icons.search,
                     color: Colors.black,
                   ),
-                  /*onPressed: () {
-                    print('trying to tweet');
-                    tweet();
-                  },*/
+                  onPressed: (){_onSearchButtonPressed();},
                 ),
-              ),
-              validator: (value) {
-                if (value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
+              ]
             ),
             TextButton(
               onPressed: () {
@@ -130,7 +132,7 @@ class _SearchFormState extends State<SearchForm> {
         ),
       ),
         if(showFilters)
-          Expanded(child: FilteredSearchForm())
+          FilteredSearchForm()
     ]
     );
   }

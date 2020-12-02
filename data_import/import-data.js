@@ -12,6 +12,8 @@ const data = JSON.parse(le_json);
 
 locations = new Map();
 
+var nbEvent = 0;
+
 for (const d of data.slice(0,30)) {
     let el = {};
     // debug
@@ -25,32 +27,38 @@ for (const d of data.slice(0,30)) {
     el.image_full = d.fields.image_source;
     el.link = d.fields.lien;
     el.link_canonical = d.fields.lien_canonique;
-    el.registration_required = d.fields.inscription_necessaire.toLowerCase() == "oui";
-    console.log(d.fields.inscription_necessaire, el.registration_required);
+    el.registration_required = d.fields.inscription_necessaire && d.fields.inscription_necessaire.toLowerCase() == "oui";
+    //console.log(d.fields.inscription_necessaire, el.registration_required);
     // parse registration links
     if (d.fields.lien_d_inscription) {
         for (const l of d.fields.lien_d_inscription.split(", ")) {
-            if (l.match(/[-. ]*([0-9][-. ]*){10}/)) {
+            if (l.match(/[-. ]*([0-9][-. ]*)+/)) {
                 phone = l.replace(/[-. ]/g, "");
-                console.log("=> PHONE:", phone);
+                //console.log("=> PHONE:", phone);
                 if (!el.registration_phone) {
                     el.registration_phone = [];
                 }
                 el.registration_phone.push(phone);
             }
             else if (l.includes("@")) {
-                console.log("=> EMAIL:", l);
+                //console.log("=> EMAIL:", l);
                 if (!el.registration_email) {
                     el.registration_email = [];
                 }
                 el.registration_email.push(l);
             }
             else if (l.includes("://")) {
-                console.log("=> LINK:", l);
+                //console.log("=> LINK:", l);
                 if (!el.registration_link) {
                     el.registration_link = [];
                 }
                 el.registration_link.push(l);
+            }
+            else if (l == "") {
+                // there are some events with an empty link, skip these
+                // (médiathèque de Pontivy)
+                //console.log(d.fields.lien_d_inscription);
+                //console.log("=> EMPTY LINK");
             }
             else {
                 throw "unknown registration link type: " + l;
@@ -58,7 +66,12 @@ for (const d of data.slice(0,30)) {
         }
     }
     // parse location
-    console.log(d.fields.geolocalisation);
+    if (!d.fields.geolocalisation) {
+        // skip items without location data
+        console.log("Skipping event without location:", d.fields.identifiant, d.fields.titre_fr);
+        continue;
+    }
+    //console.log(d.fields.geolocalisation);
     const [lat, lon] = d.fields.geolocalisation;
     el.location = new firebase.firestore.GeoPoint(lat, lon);
     // location metadata
@@ -76,7 +89,7 @@ for (const d of data.slice(0,30)) {
     });
 
     // parse date
-    const regex = /^(....-..-..T..:..:..(\+..:..|Z))-(....-..-..T..:..:..(\+..:..|Z))$/;
+    const regex = /^(....-..-..T..:..:..([-+]..:..|Z))-(....-..-..T..:..:..([-+]..:..|Z))$/;
     el.dates = []
     for (const horaire of d.fields.horaires_iso.split("\r\n")) {
         const found = horaire.match(regex);
@@ -95,16 +108,24 @@ for (const d of data.slice(0,30)) {
 
     //console.log(el);
     Object.keys(el).forEach(key => el[key] === undefined ? delete el[key] : {});
+    /*
     db.collection("programme").doc(d.fields.identifiant).set(el)
         .then(function() { console.log("success event", d.fields.identifiant); })
         .catch(function(error) { console.log("error:", error); });
+        //*/
 
+    nbEvent++;
 }
+
+console.log("event#:", nbEvent);
+console.log("location#:", locations.size);
 
 for (const l of locations) {
     Object.keys(l[1]).forEach(key => l[1][key] === undefined ? delete l[1][key] : {});
     //console.log(l);
-    db.collection("locations").doc(l[0]).set(l[1])
+    /*
+    db.collection("locations_test").doc(l[0]).set(l[1])
         .then(function() { console.log("success location",l[0]); })
         .catch(function(error) { console.log("error:", error); });
+        //*/
 }

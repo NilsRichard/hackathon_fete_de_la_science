@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hackathon_fete_de_la_science/utilities/database.dart';
 
@@ -85,10 +86,25 @@ class SearchForm extends StatefulWidget {
 class _SearchFormState extends State<SearchForm> {
   final _formKey = GlobalKey<FormState>();
 
+  String _searchBar;
   bool showFilters = false;
 
+  bool streamEmptyReturn;
+
+  void myCallback(bool b) {
+    streamEmptyReturn = b;
+  }
+
   void _onSearchButtonPressed(){
-    widget.runSearch(DataBase().getEventsByTitle("La Sculpture Sonore"));
+    final form = _formKey.currentState;
+    form.save();
+    Stream<QuerySnapshot> byTitle = DataBase().getEventsByTitle(_searchBar);
+    Future<bool> emptyStream = byTitle.isEmpty;
+    emptyStream.then(myCallback);
+    //while(streamEmptyReturn==null){print("jesus fucking christ");}
+
+    widget.runSearch(DataBase().getEventsByTitle(_searchBar));
+
   }
 
   @override
@@ -105,6 +121,7 @@ class _SearchFormState extends State<SearchForm> {
               alignment: Alignment.centerRight,
               children: <Widget>[
                 TextFormField(
+                  onSaved: (value) => _searchBar = value,
                   decoration: const InputDecoration(
                     hintText: 'Enter search',
                   ),

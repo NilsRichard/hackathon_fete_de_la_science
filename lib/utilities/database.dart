@@ -19,6 +19,13 @@ class DataBase {
     return eventCollection.limit(n).snapshots();
   }
 
+  Stream<QuerySnapshot> getEventsByTitle(String keywords){
+    return eventCollection.where("title", isEqualTo: keywords).snapshots();
+  }
+  Stream<QuerySnapshot> getEventsByTheme(List<String> keywords){
+    return eventCollection.where("themes", arrayContainsAny: keywords).snapshots();
+  }
+
   Stream<QuerySnapshot> getRating(String eventId) {
     return ratings.where("event_id", isEqualTo: eventId).snapshots();
   }

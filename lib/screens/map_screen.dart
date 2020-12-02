@@ -40,16 +40,13 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
 
-    print("map_screen -> initState");
-
     mapController = MapController();
 
     var _firestore = FirebaseFirestore.instance;
 
-    var collectionReference = _firestore.collection('locations_test');
+    var collectionReference = _firestore.collection('locations');
     stream = collectionReference.snapshots().map((qusn) => qusn.docs);
     stream.listen((List<DocumentSnapshot> documentList) {
-      print("listen");
       _updateMarkers(documentList);
     });
   }
@@ -87,6 +84,7 @@ class _MapScreenState extends State<MapScreen> {
                 return FloatingActionButton(
                     child: Text(markers.length.toString()),
                     onPressed: null,
+                    heroTag: markers.hashCode,
                 );
               },
               popupOptions: PopupOptions(
@@ -105,15 +103,13 @@ class _MapScreenState extends State<MapScreen> {
         )
     );
   }
-  
+
   void _updateMarkers(List<DocumentSnapshot> documentList) {
     documentList.forEach((document) {
-      print("marker:" + document.data()['name']);
       final _marker = OurMarker(document: document);
       setState(() {
         markers[document.id] = _marker;
       });
     });
-    print("updateMarkers : end");
   }
 }

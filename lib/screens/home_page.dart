@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hackathon_fete_de_la_science/components/loading_circle.dart';
 import 'package:hackathon_fete_de_la_science/components/menu_drawer.dart';
 import 'package:hackathon_fete_de_la_science/screens/event_infos_screen.dart';
+import 'package:hackathon_fete_de_la_science/screens/search_form.dart';
 import 'package:hackathon_fete_de_la_science/utilities/auth_service.dart';
 import 'package:hackathon_fete_de_la_science/utilities/constants.dart';
 import 'package:hackathon_fete_de_la_science/utilities/database.dart';
@@ -40,6 +41,19 @@ class _HomePageState extends State<HomePage> {
         )
       },
       trailing: Icon(Icons.chevron_right),
+    );
+  }
+  Widget _buildPage(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Expanded(
+            child: SearchForm()
+        ),
+        Flexible(
+            child: _buildSuggestions()
+        ),
+      ]
     );
   }
 
@@ -85,7 +99,7 @@ class _HomePageState extends State<HomePage> {
           endDrawer: MyDrawer(),
           body: TabBarView(
             children: [
-              _buildSuggestions(),
+              _buildPage(),
               Icon(Icons.directions_run),
             ],
           ),

@@ -18,14 +18,14 @@ class DataBase {
     return eventCollection.limit(n).snapshots();
   }
 
-  Stream<QuerySnapshot> searchEvents(String keywords, String location, DateTime date, String theme){
-    if(keywords==null || keywords==""){
+  Stream<QuerySnapshot> searchEvents(
+      String keywords, String location, DateTime date, String theme) {
+    if (keywords == null || keywords == "") {
+      return eventCollection.snapshots();
+    } else {
       return eventCollection
+          .where("keywords", arrayContainsAny: keywords.split(" "))
           .snapshots();
-    }
-    else {
-      return eventCollection.where(
-          "keywords", arrayContainsAny: keywords.split(" ")).snapshots();
     }
   }
 
@@ -80,6 +80,10 @@ class DataBase {
 
   Future changeParkourTitle(String parkourId, String newTitle) {
     return parkours.doc(parkourId).update({'title': newTitle});
+  }
+
+  Future publishParkour(String parkourId) {
+    return parkours.doc(parkourId).update({'published': true});
   }
 
   Stream<QuerySnapshot> getParkourEvents(String parkourId) {

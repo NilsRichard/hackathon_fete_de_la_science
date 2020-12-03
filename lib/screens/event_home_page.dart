@@ -20,28 +20,25 @@ class _EventHomePageState extends State<EventHomePage> {
 
   Widget _buildEvent(Map<String, dynamic> event, String eventId) {
     Event ev = Event.fromJson(event, eventId);
-    return Card(
-      elevation: 2,
-      child: ListTile(
-        leading: CircleAvatar(
-          radius: 30.0,
-          child: Image.network(ev.image),
-          backgroundColor: Colors.transparent,
-        ),
-        title: Text(ev.title),
-        subtitle: Text(ev.description, maxLines: 2),
-        onTap: () => {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => EventInfosScreen(
-                event: ev,
-              ),
-            ),
-          )
-        },
-        trailing: Icon(Icons.chevron_right),
+    return ListTile(
+      leading: CircleAvatar(
+        radius: 30.0,
+        child: Image.network(ev.image),
+        backgroundColor: Colors.transparent,
       ),
+      title: Text(ev.title),
+      subtitle: Text(ev.description, maxLines: 2),
+      onTap: () => {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EventInfosScreen(
+              event: ev,
+            ),
+          ),
+        )
+      },
+      trailing: Icon(Icons.chevron_right),
     );
   }
 
@@ -53,7 +50,7 @@ class _EventHomePageState extends State<EventHomePage> {
           Flexible(
             flex: 0,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 20.0),
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: SearchForm(runSearch: modifyEvents),
             ),
           ),
@@ -69,12 +66,15 @@ class _EventHomePageState extends State<EventHomePage> {
             return LoadingCircle();
           } else {
             if (snapshot.data.docs.length > 0) {
-              return ListView.builder(
+              return ListView.separated(
                 padding: EdgeInsets.all(16.0),
                 itemCount: snapshot.data.docs.length,
                 itemBuilder: /*1*/ (context, i) {
                   return _buildEvent(
                       snapshot.data.docs[i].data(), snapshot.data.docs[i].id);
+                },
+                separatorBuilder: (BuildContext context, int index) {
+                  return Divider();
                 },
               );
             } else {

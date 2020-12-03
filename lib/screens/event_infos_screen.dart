@@ -201,7 +201,6 @@ class EventInfosScreenState extends State<EventInfosScreen> {
                 buildKeywords(),
               ],
             )),
-        SizedBox(height: 100.0),
       ],
     );
   }
@@ -216,6 +215,7 @@ class EventInfosScreenState extends State<EventInfosScreen> {
       body: ListView(
         children: [
           buildTop(),
+          SizedBox(height: 100.0),
         ],
       ),
       floatingActionButton: ElevatedButton(
@@ -314,37 +314,6 @@ class ParkourChoserState extends State<ParkourChoser> {
         });
   }
 
-  Widget dialog(Widget child) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      elevation: 0.0,
-      backgroundColor: Colors.transparent,
-      child: Container(
-        padding: EdgeInsets.only(
-          top: Consts.padding + 15,
-          bottom: Consts.padding,
-          left: Consts.padding,
-          right: Consts.padding,
-        ),
-        decoration: new BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.rectangle,
-          borderRadius: BorderRadius.circular(Consts.padding),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10.0,
-              offset: const Offset(0.0, 10.0),
-            ),
-          ],
-        ),
-        child: child,
-      ),
-    );
-  }
-
   updateName(String parkourId) {
     showDialog(
         child: dialog(
@@ -388,7 +357,7 @@ class ParkourChoserState extends State<ParkourChoser> {
               ),
               SizedBox(width: 15.0),
               RawMaterialButton(
-                fillColor: Colors.green,
+                fillColor: Colors.blue,
                 shape: CircleBorder(),
                 constraints: BoxConstraints.tightFor(
                   width: 35.0,
@@ -436,10 +405,4 @@ class ParkourChoserState extends State<ParkourChoser> {
       ),
     );
   }
-}
-
-class Consts {
-  Consts._();
-
-  static const double padding = 16.0;
 }

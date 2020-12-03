@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 
 class DataBase {
   final CollectionReference eventCollection =
@@ -19,15 +18,22 @@ class DataBase {
     return eventCollection.limit(n).snapshots();
   }
 
-  Stream<QuerySnapshot> getEventsByTitle(String keywords){
+  Stream<QuerySnapshot> getEventsByTitle(String keywords) {
     return eventCollection.where("title", isEqualTo: keywords).snapshots();
   }
-  Stream<QuerySnapshot> getEventsByTheme(List<String> keywords){
-    return eventCollection.where("themes", arrayContainsAny: keywords).snapshots();
+
+  Stream<QuerySnapshot> getEventsByTheme(List<String> keywords) {
+    return eventCollection
+        .where("themes", arrayContainsAny: keywords)
+        .snapshots();
   }
 
   Stream<QuerySnapshot> getRating(String eventId) {
     return ratings.where("event_id", isEqualTo: eventId).snapshots();
+  }
+
+  Stream<DocumentSnapshot> getEvent(String eventId) {
+    return eventCollection.doc(eventId).snapshots();
   }
 
   Future rateEvent(String userId, String eventId, double rate) {
@@ -65,11 +71,20 @@ class DataBase {
     return parkours.doc(parkourId).update({'title': newTitle});
   }
 
+  Stream<QuerySnapshot> getParkourEvents(String parkourId) {
+    return parkours.doc(parkourId).collection("events").snapshots();
+  }
+
+  Stream<QuerySnapshot> getPublishedParkours() {
+    return parkours.where('published', isEqualTo: true).snapshots();
+  }
+
   Future<DocumentReference> addParkour(String userId, String title) {
     return parkours.add({
       'user_id': userId,
       'title': title,
       'published': false,
+      'writtenDate': Timestamp.now().toDate()
     });
   }
 
@@ -118,8 +133,6 @@ class Event {
   String registrationPhone;
   String registrationLink;
 
-  double rating; // TODO à implémenter
-
 // Empty constructor
   Event();
 
@@ -151,8 +164,6 @@ class Event {
     this.registrationLink = (json['registration_link'] != null
         ? json['registration_link'][0]
         : null);
-
-    this.rating = 3.5; // TODO
   }
 
   static List<String> stringListFromDynamicList(List<dynamic> list) {

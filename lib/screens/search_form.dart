@@ -12,6 +12,9 @@ class FilteredSearchForm extends StatefulWidget {
 class _FilteredSearchFormState extends State<FilteredSearchForm> {
   final _formKey = GlobalKey<FormState>();
 
+  String address;
+  String themes;
+
   //Date stuff:
   DateTime selectedDate = DateTime.now();
   TextEditingController _date = new TextEditingController();
@@ -38,6 +41,7 @@ class _FilteredSearchFormState extends State<FilteredSearchForm> {
         children: <Widget>[
           //Location:
           TextFormField(
+            onSaved: (value) => address = value,
             decoration: const InputDecoration(
               hintText: 'Enter Location',
             ),
@@ -60,6 +64,7 @@ class _FilteredSearchFormState extends State<FilteredSearchForm> {
           ),
           //Theme:
           TextFormField(
+            onSaved: (value) => themes = value,
             decoration: const InputDecoration(
               hintText: 'Enter Theme',
             ),
@@ -87,23 +92,22 @@ class _SearchFormState extends State<SearchForm> {
   final _formKey = GlobalKey<FormState>();
 
   String _searchBar;
+  String address;
+  String themes;
   bool showFilters = false;
 
-  bool streamEmptyReturn;
-
-  void myCallback(bool b) {
-    streamEmptyReturn = b;
-  }
 
   void _onSearchButtonPressed(){
     final form = _formKey.currentState;
     form.save();
-    Stream<QuerySnapshot> byTitle = DataBase().getEventsByTitle(_searchBar);
-    Future<bool> emptyStream = byTitle.isEmpty;
-    emptyStream.then(myCallback);
-    //while(streamEmptyReturn==null){print("jesus fucking christ");}
 
-    widget.runSearch(DataBase().getEventsByTitle(_searchBar));
+    //Stream<QuerySnapshot> locationStream = DataBase().getLocationsByAddress(address);
+    Stream<QuerySnapshot> filteredEvents = DataBase().searchEvents(_searchBar, "",null, "");
+    //apply theme filter:
+
+
+    //applys function given from parent, replaces _events
+    widget.runSearch(filteredEvents);
 
   }
 

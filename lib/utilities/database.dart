@@ -18,6 +18,17 @@ class DataBase {
     return eventCollection.limit(n).snapshots();
   }
 
+  Stream<QuerySnapshot> searchEvents(String keywords, String location, DateTime date, String theme){
+    if(keywords==null || keywords==""){
+      return eventCollection
+          .snapshots();
+    }
+    else {
+      return eventCollection.where(
+          "keywords", arrayContainsAny: keywords.split(" ")).snapshots();
+    }
+  }
+
   Stream<QuerySnapshot> getEventsByTitle(String keywords) {
     return eventCollection.where("title", isEqualTo: keywords).snapshots();
   }

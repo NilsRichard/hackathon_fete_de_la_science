@@ -10,6 +10,9 @@ class DataBase {
   final CollectionReference parkours =
       FirebaseFirestore.instance.collection("parkours");
 
+  final CollectionReference orga =
+      FirebaseFirestore.instance.collection("orga");
+
   Stream<QuerySnapshot> getEventsStream() {
     return eventCollection.snapshots();
   }
@@ -123,6 +126,30 @@ class DataBase {
               else
                 print("Already in parcours")
             });
+  }
+
+  Stream<DocumentSnapshot> getFullness(String eventId) {
+    return orga.doc(eventId).snapshots();
+  }
+
+  Future setFullness(String eventId, double value, String userId) {
+    print('setting fullness');
+    return orga.doc(eventId).get().then((doc) => {
+          if (doc.exists)
+            {
+              if (doc['organizers'].contains(userId))
+                {
+                  doc.reference.update({
+                    'fullness': value,
+                  })
+                }
+            }
+          else
+            orga.doc(eventId).set({
+              'fullness': value,
+              'organizers': [userId],
+            })
+        });
   }
 }
 

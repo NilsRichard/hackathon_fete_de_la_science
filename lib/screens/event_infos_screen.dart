@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hackathon_fete_de_la_science/components/loading_circle.dart';
 import 'package:hackathon_fete_de_la_science/components/menu_drawer.dart';
 import 'package:hackathon_fete_de_la_science/components/star_rating.dart';
@@ -113,7 +114,7 @@ class EventInfosScreenState extends State<EventInfosScreen> {
     );
   }
 
-  Widget buildRating() {
+  Widget buildStarRating() {
     return StreamBuilder<QuerySnapshot>(
         stream: DataBase().getRating(widget.event.id),
         builder: (context, snapshot) {
@@ -126,7 +127,7 @@ class EventInfosScreenState extends State<EventInfosScreen> {
                 total += element["rate"];
               });
               return Center(
-                child: StarRating(
+                child: Rating(
                   rating: total / snapshot.data.docs.length,
                   totalRatings: snapshot.data.docs.length,
                   onRatingChanged: (rating) => {
@@ -137,7 +138,7 @@ class EventInfosScreenState extends State<EventInfosScreen> {
               );
             } else {
               return Center(
-                child: StarRating(
+                child: Rating(
                   rating: 0,
                   onRatingChanged: (rating) => {
                     DataBase().rateEvent(
@@ -146,6 +147,32 @@ class EventInfosScreenState extends State<EventInfosScreen> {
                 ),
               );
             }
+          }
+        });
+  }
+
+  Widget buildFullnessRating() {
+    return StreamBuilder<DocumentSnapshot>(
+        stream: DataBase().getFullness(widget.event.id),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return LoadingCircle();
+          } else {
+            double rating = 0;
+            if (snapshot.data.exists) rating = snapshot.data['fullness'];
+            return Center(
+              child: Rating(
+                emptyIcon: FontAwesomeIcons.male,
+                halfIcon: FontAwesomeIcons.male,
+                fullIcon: FontAwesomeIcons.male,
+                marginBetween: 10,
+                rating: rating,
+                onRatingChanged: (rating) => {
+                  DataBase().setFullness(
+                      widget.event.id, rating, AuthService().getUser.email)
+                },
+              ),
+            );
           }
         });
   }
@@ -172,7 +199,7 @@ class EventInfosScreenState extends State<EventInfosScreen> {
           textAlign: TextAlign.center,
         ),
         SizedBox(height: 15.0),
-        buildRating(),
+        buildStarRating(),
         SizedBox(height: 15.0),
         Padding(
             padding: EdgeInsets.symmetric(horizontal: 15),
@@ -188,6 +215,9 @@ class EventInfosScreenState extends State<EventInfosScreen> {
                   textAlign: TextAlign.justify,
                 ),
                 SizedBox(height: 15.0),
+                buildTitle2("Taux de remplissage :"),
+                SizedBox(height: 15.0),
+                buildFullnessRating(),
                 // buildTitle2("Lieu"),
                 // SizedBox(height: 15.0),
                 // buildLieu(),

@@ -21,8 +21,7 @@ class DataBase {
     return eventCollection.limit(n).snapshots();
   }
 
-  Stream<QuerySnapshot> searchEvents(
-      String keywords, String location, DateTime date, String theme) {
+  Stream<QuerySnapshot> searchEvents(String keywords) {
     if (keywords == null || keywords == "") {
       return eventCollection.snapshots();
     } else {
@@ -165,6 +164,7 @@ class Event {
 
   String locationId;
   GeoPoint location;
+  String address;
 
   List<String> themes;
   String title;
@@ -184,6 +184,7 @@ class Event {
     this.description = json["description"];
     this.descriptionLong = json['description_long'];
     this.image = json['image'];
+    this.address = json['address'];
 
     this.keywords = stringListFromDynamicList(json['keywords']);
 
@@ -244,5 +245,13 @@ class DatesEvent {
   DatesEvent.fromJson(Map json) {
     this.end = json["end"];
     this.start = json["start"];
+  }
+  bool containsDay(DateTime day){
+    DateTime startBis = start.toDate();
+    DateTime endBis = end.toDate();
+    startBis = DateTime(startBis.year, startBis.month, startBis.day-1);
+    endBis = DateTime(endBis.year, endBis.month, endBis.day + 1);
+    //print(startBis.toString() + " anddddd " + endBis.toString());
+    return startBis.isBefore(day) && endBis.isAfter(day);
   }
 }

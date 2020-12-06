@@ -12,14 +12,50 @@ class EventHomePage extends StatefulWidget {
 
 class _EventHomePageState extends State<EventHomePage> {
   var _events = DataBase().getEventsStream();
-  void modifyEvents(Stream<QuerySnapshot> filteredEvents) {
+  FilterData filters = FilterData.emptyFilter();
+  void modifyEvents(Stream<QuerySnapshot> filteredEvents, FilterData _filters) {
     setState(() {
       _events = filteredEvents;
+      filters = _filters;
     });
   }
 
-  Widget _buildEvent(Map<String, dynamic> event, String eventId) {
-    Event ev = Event.fromJson(event, eventId);
+  Event generateEvent(Map<String, dynamic> event, String eventId){
+    return Event.fromJson(event, eventId);
+  }
+
+  Widget applyFilters(Event ev){
+    //print("went into fliters");
+    bool foundDate = false;
+    if(filters.date!=null) {
+      //print("went into check date");
+      int iter = 0;
+      List<DatesEvent> dates = ev.dates;
+      while (!foundDate && iter < dates.length) {
+        DatesEvent possibleDate = dates.elementAt(iter);
+        foundDate = possibleDate.containsDay(filters.date);
+        iter++;
+      }
+    }
+    else{
+      foundDate = true;
+    }
+    bool foundLocation =true;
+    if(filters.location != null && filters.location != "") {
+      foundLocation = false;
+      if(ev.address.contains(filters.location)){
+        foundLocation = true;
+      }
+    }
+    if(foundDate && foundLocation){
+      return _buildListTile(ev);
+    }
+    else{
+      return Container(width: 0, height: 0);
+    }
+  }
+
+  Widget _buildListTile(Event ev) {
     ImageProvider<Object> image = ev.image != null
         ? NetworkImage(ev.image)
         : AssetImage('images/empty.jpg');
@@ -79,8 +115,9 @@ class _EventHomePageState extends State<EventHomePage> {
                 padding: EdgeInsets.all(16.0),
                 itemCount: snapshot.data.docs.length,
                 itemBuilder: /*1*/ (context, i) {
-                  return _buildEvent(
+                  Event currentEvent = generateEvent(
                       snapshot.data.docs[i].data(), snapshot.data.docs[i].id);
+                  return applyFilters(currentEvent);
                 },
                 separatorBuilder: (BuildContext context, int index) {
                   return Divider();

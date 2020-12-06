@@ -154,7 +154,7 @@ class _SearchFormState extends State<SearchForm> {
     Stream<QuerySnapshot> filteredEvents = DataBase().searchEvents(_searchBar);
 
     //applys function given from parent, replaces _events
-    print("passed to form: " + filters.location);
+
     widget.runSearch(filteredEvents, filters);
 
   }

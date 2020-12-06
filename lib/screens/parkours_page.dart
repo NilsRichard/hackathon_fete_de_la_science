@@ -12,6 +12,14 @@ class ParkoursPage extends StatefulWidget {
 }
 
 class _ParkoursPageState extends State<ParkoursPage> {
+  TextEditingController _c;
+  String title;
+  @override
+  initState() {
+    _c = new TextEditingController();
+    super.initState();
+  }
+
   var _events = DataBase().getPublishedParkours();
   bool seeMyParkours = false;
 
@@ -65,6 +73,45 @@ class _ParkoursPageState extends State<ParkoursPage> {
     );
   }
 
+  updateName(String parkourId) {
+    showDialog(
+        useRootNavigator: false,
+        child: dialog(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new TextField(
+                decoration: new InputDecoration(hintText: "Nouveau parcours"),
+                controller: _c,
+              ),
+              ButtonBar(
+                children: [
+                  FlatButton(
+                    child: new Text("Valider"),
+                    onPressed: () {
+                      String newTitle = _c.text;
+                      DataBase().changeParkourTitle(parkourId,
+                          newTitle.isEmpty ? "Nouveau parcours" : newTitle);
+
+                      Navigator.of(context).pop();
+                      _c.text = "";
+                    },
+                  ),
+                  FlatButton(
+                    child: new Text("Annuler"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _c.text = "";
+                    },
+                  )
+                ],
+              ),
+            ],
+          ),
+        ),
+        context: context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,8 +125,15 @@ class _ParkoursPageState extends State<ParkoursPage> {
           SizedBox(height: 15.0),
         ],
       ),
-      floatingActionButton:
-          FloatingActionButton(child: Icon(Icons.add), onPressed: () => {}),
+      floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () => {
+                DataBase()
+                    .addParkour(AuthService().getUser.email, "Nouveau parcours")
+                    .then((value) => {
+                          updateName(value.id),
+                        })
+              }),
     );
   }
 

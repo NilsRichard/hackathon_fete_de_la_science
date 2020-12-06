@@ -12,6 +12,7 @@ class EventHomePage extends StatefulWidget {
 
 class _EventHomePageState extends State<EventHomePage> {
   var _events = DataBase().getEventsStream();
+  bool found;
   FilterData filters = FilterData.emptyFilter();
   void modifyEvents(Stream<QuerySnapshot> filteredEvents, FilterData _filters) {
     setState(() {
@@ -47,8 +48,10 @@ class _EventHomePageState extends State<EventHomePage> {
       }
     }
     if (foundDate && foundLocation) {
+      found = true;
       return _buildListTile(ev);
     } else {
+      found = false;
       return Container(width: 0, height: 0);
     }
   }
@@ -118,7 +121,12 @@ class _EventHomePageState extends State<EventHomePage> {
                   return applyFilters(currentEvent);
                 },
                 separatorBuilder: (BuildContext context, int index) {
-                  return Divider();
+                  if(!found) {
+                    return Container(width: 0, height: 0);
+                  }
+                  else{
+                    return Divider();
+                  }
                 },
               );
             } else {

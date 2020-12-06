@@ -20,11 +20,20 @@ class _EventHomePageState extends State<EventHomePage> {
 
   Widget _buildEvent(Map<String, dynamic> event, String eventId) {
     Event ev = Event.fromJson(event, eventId);
+    ImageProvider<Object> image = ev.image != null
+        ? NetworkImage(ev.image)
+        : AssetImage('images/empty.jpg');
     return ListTile(
-      leading: CircleAvatar(
-        radius: 30.0,
-        child: Image.network(ev.image),
-        backgroundColor: Colors.transparent,
+      leading: Container(
+        width: 50.0,
+        height: 50.0,
+        decoration: new BoxDecoration(
+          shape: BoxShape.circle,
+          image: new DecorationImage(
+            fit: BoxFit.fitHeight,
+            image: image,
+          ),
+        ),
       ),
       title: Text(ev.title),
       subtitle: Text(ev.description, maxLines: 2),

@@ -6,11 +6,13 @@ import 'package:hackathon_fete_de_la_science/utilities/database.dart';
 class FilteredSearchForm extends StatefulWidget {
   final updateFilters;
   FilterData oldFilter;
-  FilteredSearchForm({Key key, this.updateFilters, this.oldFilter}) : super(key: key);
+  FilteredSearchForm({Key key, this.updateFilters, this.oldFilter})
+      : super(key: key);
 
   @override
   _FilteredSearchFormState createState() => _FilteredSearchFormState();
 }
+
 class _FilteredSearchFormState extends State<FilteredSearchForm> {
   final _formKey = GlobalKey<FormState>();
 
@@ -23,13 +25,14 @@ class _FilteredSearchFormState extends State<FilteredSearchForm> {
   void initState() {
     super.initState();
     date = widget.oldFilter.date;
-    if(date!=null) {
+    if (date != null) {
       _date = new TextEditingController(
-          text: date.day.toString() + " / " + date.month.toString() + " / " +
-              date.year.toString()
-      );
-    }
-    else{
+          text: date.day.toString() +
+              " / " +
+              date.month.toString() +
+              " / " +
+              date.year.toString());
+    } else {
       _date = new TextEditingController();
     }
     address = widget.oldFilter.location;
@@ -38,10 +41,8 @@ class _FilteredSearchFormState extends State<FilteredSearchForm> {
   //Date stuff:
   DateTime selectedDate = DateTime(2019, 10, 1);
 
-
-  void updateFilter(){
+  void updateFilter() {
     widget.updateFilters(FilterData(date, address, themes));
-
   }
 
   Future<Null> _selectDate(BuildContext context) async {
@@ -54,12 +55,14 @@ class _FilteredSearchFormState extends State<FilteredSearchForm> {
       setState(() {
         selectedDate = picked;
         date = selectedDate;
-        _date.value = TextEditingValue(text:
-        picked.day.toString() + " / " + picked.month.toString() + " / " +
-            picked.year.toString());
+        _date.value = TextEditingValue(
+            text: picked.day.toString() +
+                " / " +
+                picked.month.toString() +
+                " / " +
+                picked.year.toString());
         updateFilter();
       });
-
     }
   }
 
@@ -74,46 +77,53 @@ class _FilteredSearchFormState extends State<FilteredSearchForm> {
           TextFormField(
             initialValue: address,
             //onSaved: (String value){print("saving adress");address = value; updateFilter();},
-            onChanged: (String value){address = value; updateFilter();},
+            onChanged: (String value) {
+              address = value;
+              updateFilter();
+            },
             decoration: const InputDecoration(
-              hintText: 'Enter Location',
+              hintText: 'Entrer un lieu',
             ),
             validator: (value) {
               return null;
             },
           ),
           //Date, call the function created at start of class:
-          Stack(
-            alignment: Alignment.centerRight,
-            children: <Widget>[
-              GestureDetector(
-                onTap: () => _selectDate(context),
-                child: AbsorbPointer(
-                  child: TextFormField(
-                    //initialValue: selectedDate.day.toString() + " / " + selectedDate.month.toString() + " / " +selectedDate.year.toString(),
-                    controller: _date,
-                    keyboardType: TextInputType.datetime,
-                    decoration: InputDecoration(
-                      hintText: 'Enter Date',
-                    ),
+          Stack(alignment: Alignment.centerRight, children: <Widget>[
+            GestureDetector(
+              onTap: () => _selectDate(context),
+              child: AbsorbPointer(
+                child: TextFormField(
+                  //initialValue: selectedDate.day.toString() + " / " + selectedDate.month.toString() + " / " +selectedDate.year.toString(),
+                  controller: _date,
+                  keyboardType: TextInputType.datetime,
+                  decoration: InputDecoration(
+                    hintText: 'Enter une date',
                   ),
                 ),
               ),
-              //Button to erase value of date.
-              IconButton(
-                icon: Icon(
-                  Icons.cancel,
-                  color: Colors.black,
-                ),
-                onPressed: (){date = null; updateFilter();_date.value = TextEditingValue(text: "");},
+            ),
+            //Button to erase value of date.
+            IconButton(
+              icon: Icon(
+                Icons.cancel,
+                color: Colors.black,
               ),
-            ]
-          ),
+              onPressed: () {
+                date = null;
+                updateFilter();
+                _date.value = TextEditingValue(text: "");
+              },
+            ),
+          ]),
           //Theme:
           TextFormField(
-            onSaved: (String value){themes = value; updateFilter();},
+            onSaved: (String value) {
+              themes = value;
+              updateFilter();
+            },
             decoration: const InputDecoration(
-              hintText: 'Enter Theme',
+              hintText: 'Enter un thème',
             ),
             validator: (value) {
               return null;
@@ -142,12 +152,11 @@ class _SearchFormState extends State<SearchForm> {
   FilterData filters = FilterData.emptyFilter();
   bool showFilters = false;
 
-  void updateFilters(FilterData _filters){
+  void updateFilters(FilterData _filters) {
     filters = _filters;
   }
 
-
-  void _onSearchButtonPressed(){
+  void _onSearchButtonPressed() {
     final form = _formKey.currentState;
     form.save();
 
@@ -156,63 +165,58 @@ class _SearchFormState extends State<SearchForm> {
     //applys function given from parent, replaces _events
 
     widget.runSearch(filteredEvents, filters);
-
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Stack(
-              alignment: Alignment.centerRight,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                TextFormField(
-                  onSaved: (value) => _searchBar = value,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter search',
+                Stack(alignment: Alignment.centerRight, children: <Widget>[
+                  TextFormField(
+                    onSaved: (value) => _searchBar = value,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter search',
+                    ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(
-                    Icons.search,
-                    color: Colors.black,
+                  IconButton(
+                    icon: Icon(
+                      Icons.search,
+                      color: Colors.black,
+                    ),
+                    onPressed: () {
+                      _onSearchButtonPressed();
+                    },
                   ),
-                  onPressed: (){_onSearchButtonPressed();},
+                ]),
+                TextButton(
+                  onPressed: () {
+                    //show filters
+                    showFilters = !showFilters;
+                    setState(() {});
+                  },
+                  child: Text('Filters'),
                 ),
-              ]
+              ],
             ),
-            TextButton(
-              onPressed: () {
-                //show filters
-                showFilters = !showFilters;
-                setState(() {
-                });
-              },
-              child: Text('Filters'),
-            ),
-
-          ],
-        ),
-      ),
-        if(showFilters)
-          FilteredSearchForm(updateFilters: updateFilters, oldFilter: filters)
-    ]
-    );
+          ),
+          if (showFilters)
+            FilteredSearchForm(updateFilters: updateFilters, oldFilter: filters)
+        ]);
   }
 }
 
-class FilterData{
+class FilterData {
   DateTime date;
   String location;
   String themes;
-  FilterData.emptyFilter(){}
-  FilterData(DateTime date, String location, String themes){
+  FilterData.emptyFilter() {}
+  FilterData(DateTime date, String location, String themes) {
     this.date = date;
     this.location = location;
     this.themes = themes;

@@ -26,7 +26,8 @@ class DataBase {
       return eventCollection.snapshots();
     } else {
       return eventCollection
-          .where("keywords", arrayContainsAny: keywords.split(" "))
+          .where("keywords",
+              arrayContainsAny: keywords.toLowerCase().split(" "))
           .snapshots();
     }
   }
@@ -246,10 +247,10 @@ class DatesEvent {
     this.end = json["end"];
     this.start = json["start"];
   }
-  bool containsDay(DateTime day){
+  bool containsDay(DateTime day) {
     DateTime startBis = start.toDate();
     DateTime endBis = end.toDate();
-    startBis = DateTime(startBis.year, startBis.month, startBis.day-1);
+    startBis = DateTime(startBis.year, startBis.month, startBis.day - 1);
     endBis = DateTime(endBis.year, endBis.month, endBis.day + 1);
     //print(startBis.toString() + " anddddd " + endBis.toString());
     return startBis.isBefore(day) && endBis.isAfter(day);

@@ -20,14 +20,14 @@ class _EventHomePageState extends State<EventHomePage> {
     });
   }
 
-  Event generateEvent(Map<String, dynamic> event, String eventId){
+  Event generateEvent(Map<String, dynamic> event, String eventId) {
     return Event.fromJson(event, eventId);
   }
 
-  Widget applyFilters(Event ev){
+  Widget applyFilters(Event ev) {
     //print("went into fliters");
     bool foundDate = false;
-    if(filters.date!=null) {
+    if (filters.date != null) {
       //print("went into check date");
       int iter = 0;
       List<DatesEvent> dates = ev.dates;
@@ -36,21 +36,19 @@ class _EventHomePageState extends State<EventHomePage> {
         foundDate = possibleDate.containsDay(filters.date);
         iter++;
       }
-    }
-    else{
+    } else {
       foundDate = true;
     }
-    bool foundLocation =true;
-    if(filters.location != null && filters.location != "") {
+    bool foundLocation = true;
+    if (filters.location != null && filters.location != "") {
       foundLocation = false;
-      if(ev.address.contains(filters.location)){
+      if (ev.address.contains(filters.location)) {
         foundLocation = true;
       }
     }
-    if(foundDate && foundLocation){
+    if (foundDate && foundLocation) {
       return _buildListTile(ev);
-    }
-    else{
+    } else {
       return Container(width: 0, height: 0);
     }
   }
@@ -124,7 +122,7 @@ class _EventHomePageState extends State<EventHomePage> {
                 },
               );
             } else {
-              return Center(child: Text('There are no events'));
+              return Center(child: Text('Aucun événement trouvé'));
             }
           }
         });

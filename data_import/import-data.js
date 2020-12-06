@@ -11,6 +11,7 @@ const le_json = fs.readFileSync("fr-esr-fete-de-la-science-19.json");
 const data = JSON.parse(le_json);
 
 locations = new Map();
+events = new Map();
 
 var nbEvent = 0;
 
@@ -28,6 +29,7 @@ for (const d of data.slice(0,30)) {
     el.link = d.fields.lien;
     el.link_canonical = d.fields.lien_canonique;
     el.registration_required = d.fields.inscription_necessaire && d.fields.inscription_necessaire.toLowerCase() == "oui";
+    el.address = d.fields.adresse;
     //console.log(d.fields.inscription_necessaire, el.registration_required);
     // parse registration links
     if (d.fields.lien_d_inscription) {
@@ -113,6 +115,7 @@ for (const d of data.slice(0,30)) {
         .then(function() { console.log("success event", d.fields.identifiant); })
         .catch(function(error) { console.log("error:", error); });
         //*/
+    events.set(d.fields.identifiant, el);
 
     nbEvent++;
 }
@@ -129,3 +132,12 @@ for (const l of locations) {
         .catch(function(error) { console.log("error:", error); });
         //*/
 }
+
+fs.writeFile('out-events.json', JSON.stringify([...events]), 'utf8', (err) => {
+    if (err) { console.log("error writing out-events.json:", err); }
+    else { console.log("done writing out-events.json"); }
+});
+fs.writeFile('out-locations.json', JSON.stringify([...locations]), 'utf8', (err) => {
+    if (err) { console.log("error writing out-locations.json:", err); }
+    else { console.log("done writing out-locations.json"); }
+});

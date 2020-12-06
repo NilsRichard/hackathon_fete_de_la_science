@@ -15,14 +15,16 @@ events = new Map();
 
 var nbEvent = 0;
 
-for (const d of data.slice(0,30)) {
+for (const d of data.slice(0,150)) {
     let el = {};
     // debug
     //console.log(d.fields);
     // add some data
     el.title = d.fields.titre_fr;
     el.description = d.fields.description_fr;
+    if (!el.description) { el.description = "Aucune description"; }
     el.description_long = d.fields.description_longue_fr;
+    if (!el.description_long) { el.description_long = el.description; }
     el.image = d.fields.image;
     el.image_thumb = d.fields.apercu;
     el.image_full = d.fields.image_source;
@@ -100,8 +102,29 @@ for (const d of data.slice(0,30)) {
 
     // parse keywords
     if (d.fields.mots_cles_fr) {
-        el.keywords = d.fields.mots_cles_fr.split(",");
+        el.keywords = d.fields.mots_cles_fr.toLowerCase().split(",");
     }
+    if (!el.keywords) {
+        el.keywords = [];
+    }
+    console.log("--",el.title);
+    console.log(el.keywords);
+    const badwords = new Set([
+        "",
+        "un","une",
+        "de","du","des",
+        "le","les","la",
+        "et", "à",
+        "on","il",
+        "y","a",
+        "se","en","ne",
+        "sur",
+        "!",":","?",
+    ]);
+    el.keywords = el.keywords.concat(el.title.toLowerCase().split(" ").filter(e => !badwords.has(e)));
+    console.log(el.keywords);
+    el.keywords = [...new Set(el.keywords)];
+    console.log(el.keywords);
 
     // parse themes
     if (d.fields.thematiques) {
@@ -110,9 +133,10 @@ for (const d of data.slice(0,30)) {
 
     //console.log(el);
     Object.keys(el).forEach(key => el[key] === undefined ? delete el[key] : {});
+    let currentEvent = nbEvent;
     /*
     db.collection("programme").doc(d.fields.identifiant).set(el)
-        .then(function() { console.log("success event", d.fields.identifiant); })
+        .then(function() { console.log("success event", d.fields.identifiant, "//", currentEvent); })
         .catch(function(error) { console.log("error:", error); });
         //*/
     events.set(d.fields.identifiant, el);
@@ -123,14 +147,18 @@ for (const d of data.slice(0,30)) {
 console.log("event#:", nbEvent);
 console.log("location#:", locations.size);
 
+let nbLoc = 0;
 for (const l of locations) {
     Object.keys(l[1]).forEach(key => l[1][key] === undefined ? delete l[1][key] : {});
     //console.log(l);
+    let currentLoc = nbLoc;
     /*
-    db.collection("locations_test").doc(l[0]).set(l[1])
-        .then(function() { console.log("success location",l[0]); })
+    db.collection("locations").doc(l[0]).set(l[1])
+        .then(function() { console.log("success location", l[0], "//", currentLoc); })
         .catch(function(error) { console.log("error:", error); });
         //*/
+
+    nbLoc++;
 }
 
 fs.writeFile('out-events.json', JSON.stringify([...events]), 'utf8', (err) => {

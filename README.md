@@ -7,25 +7,31 @@ Ce sont des données statiques, format libre.
 
 ## Fonctionnalités à réaliser
 
-1.Exploration des événements via une Liste (avec filtrage) et une Map interactive
-1.Affichage d’informations sur un événement
-1.Intégration des fonctionnalités du terminal
-1.Système de notation des événements par les utilisateurs
-1.Création de parcours (suite d’événements) et leur publication
-1.Système de mise à jour du taux de remplissage par des organisateurs
+1. Exploration des événements via une Liste (avec filtrage) et une Map interactive
+1. Affichage d’informations sur un événement
+1. Intégration des fonctionnalités du terminal
+1. Système de notation des événements par les utilisateurs
+1. Création de parcours (suite d’événements) et leur publication
+1. Système de mise à jour du taux de remplissage par des organisateurs
 
-Toutes les fonctionnalités ont été réalisées
+*Toutes les fonctionnalités ont été réalisées*
 
 ## Technologies utilisées
 
-1.Flutter (Dart)
-1.Github
-1.NodeJs
-1.Firebase
+1. Flutter (Dart)
+1. Github
+1. NodeJs
+1. Firebase
 
 ## Architecture
 
+### Design
 
+![](images/reflexion.png)
+
+### Résultat
+
+![](images\img1.png)
 
 
 

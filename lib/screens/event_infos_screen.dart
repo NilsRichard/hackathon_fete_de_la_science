@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hackathon_fete_de_la_science/components/loading_circle.dart';
 import 'package:hackathon_fete_de_la_science/components/menu_drawer.dart';
-import 'package:hackathon_fete_de_la_science/components/star_rating.dart';
+import 'package:hackathon_fete_de_la_science/components/rating.dart';
 import 'package:hackathon_fete_de_la_science/utilities/auth_service.dart';
 import 'package:hackathon_fete_de_la_science/utilities/constants.dart';
 import 'package:hackathon_fete_de_la_science/utilities/database.dart';
@@ -113,7 +114,7 @@ class EventInfosScreenState extends State<EventInfosScreen> {
     );
   }
 
-  Widget buildRating() {
+  Widget buildStarRating() {
     return StreamBuilder<QuerySnapshot>(
         stream: DataBase().getRating(widget.event.id),
         builder: (context, snapshot) {
@@ -126,7 +127,7 @@ class EventInfosScreenState extends State<EventInfosScreen> {
                 total += element["rate"];
               });
               return Center(
-                child: StarRating(
+                child: Rating(
                   rating: total / snapshot.data.docs.length,
                   totalRatings: snapshot.data.docs.length,
                   onRatingChanged: (rating) => {
@@ -137,7 +138,7 @@ class EventInfosScreenState extends State<EventInfosScreen> {
               );
             } else {
               return Center(
-                child: StarRating(
+                child: Rating(
                   rating: 0,
                   onRatingChanged: (rating) => {
                     DataBase().rateEvent(
@@ -146,6 +147,32 @@ class EventInfosScreenState extends State<EventInfosScreen> {
                 ),
               );
             }
+          }
+        });
+  }
+
+  Widget buildFullnessRating() {
+    return StreamBuilder<DocumentSnapshot>(
+        stream: DataBase().getFullness(widget.event.id),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return LoadingCircle();
+          } else {
+            double rating = 0;
+            if (snapshot.data.exists) rating = snapshot.data['fullness'];
+            return Center(
+              child: Rating(
+                emptyIcon: FontAwesomeIcons.male,
+                halfIcon: FontAwesomeIcons.male,
+                fullIcon: FontAwesomeIcons.male,
+                marginBetween: 10,
+                rating: rating,
+                onRatingChanged: (rating) => {
+                  DataBase().setFullness(
+                      widget.event.id, rating, AuthService().getUser.email)
+                },
+              ),
+            );
           }
         });
   }
@@ -172,7 +199,7 @@ class EventInfosScreenState extends State<EventInfosScreen> {
           textAlign: TextAlign.center,
         ),
         SizedBox(height: 15.0),
-        buildRating(),
+        buildStarRating(),
         SizedBox(height: 15.0),
         Padding(
             padding: EdgeInsets.symmetric(horizontal: 15),
@@ -188,6 +215,9 @@ class EventInfosScreenState extends State<EventInfosScreen> {
                   textAlign: TextAlign.justify,
                 ),
                 SizedBox(height: 15.0),
+                buildTitle2("Taux de remplissage :"),
+                SizedBox(height: 15.0),
+                buildFullnessRating(),
                 // buildTitle2("Lieu"),
                 // SizedBox(height: 15.0),
                 // buildLieu(),
@@ -201,7 +231,6 @@ class EventInfosScreenState extends State<EventInfosScreen> {
                 buildKeywords(),
               ],
             )),
-        SizedBox(height: 100.0),
       ],
     );
   }
@@ -216,6 +245,7 @@ class EventInfosScreenState extends State<EventInfosScreen> {
       body: ListView(
         children: [
           buildTop(),
+          SizedBox(height: 100.0),
         ],
       ),
       floatingActionButton: ElevatedButton(
@@ -314,37 +344,6 @@ class ParkourChoserState extends State<ParkourChoser> {
         });
   }
 
-  Widget dialog(Widget child) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      elevation: 0.0,
-      backgroundColor: Colors.transparent,
-      child: Container(
-        padding: EdgeInsets.only(
-          top: Consts.padding + 15,
-          bottom: Consts.padding,
-          left: Consts.padding,
-          right: Consts.padding,
-        ),
-        decoration: new BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.rectangle,
-          borderRadius: BorderRadius.circular(Consts.padding),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10.0,
-              offset: const Offset(0.0, 10.0),
-            ),
-          ],
-        ),
-        child: child,
-      ),
-    );
-  }
-
   updateName(String parkourId) {
     showDialog(
         child: dialog(
@@ -388,7 +387,7 @@ class ParkourChoserState extends State<ParkourChoser> {
               ),
               SizedBox(width: 15.0),
               RawMaterialButton(
-                fillColor: Colors.green,
+                fillColor: Colors.blue,
                 shape: CircleBorder(),
                 constraints: BoxConstraints.tightFor(
                   width: 35.0,
@@ -436,10 +435,4 @@ class ParkourChoserState extends State<ParkourChoser> {
       ),
     );
   }
-}
-
-class Consts {
-  Consts._();
-
-  static const double padding = 16.0;
 }

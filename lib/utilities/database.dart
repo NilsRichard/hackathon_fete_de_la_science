@@ -10,12 +10,26 @@ class DataBase {
   final CollectionReference parkours =
       FirebaseFirestore.instance.collection("parkours");
 
+  final CollectionReference orga =
+      FirebaseFirestore.instance.collection("orga");
+
   Stream<QuerySnapshot> getEventsStream() {
     return eventCollection.snapshots();
   }
 
   Stream<QuerySnapshot> getNEventsStream(int n) {
     return eventCollection.limit(n).snapshots();
+  }
+
+  Stream<QuerySnapshot> searchEvents(String keywords) {
+    if (keywords == null || keywords == "") {
+      return eventCollection.snapshots();
+    } else {
+      return eventCollection
+          .where("keywords",
+              arrayContainsAny: keywords.toLowerCase().split(" "))
+          .snapshots();
+    }
   }
 
   Stream<QuerySnapshot> getEventsByTitle(String keywords) {
@@ -71,6 +85,10 @@ class DataBase {
     return parkours.doc(parkourId).update({'title': newTitle});
   }
 
+  Future publishParkour(String parkourId) {
+    return parkours.doc(parkourId).update({'published': true});
+  }
+
   Stream<QuerySnapshot> getParkourEvents(String parkourId) {
     return parkours.doc(parkourId).collection("events").snapshots();
   }
@@ -109,6 +127,30 @@ class DataBase {
                 print("Already in parcours")
             });
   }
+
+  Stream<DocumentSnapshot> getFullness(String eventId) {
+    return orga.doc(eventId).snapshots();
+  }
+
+  Future setFullness(String eventId, double value, String userId) {
+    print('setting fullness');
+    return orga.doc(eventId).get().then((doc) => {
+          if (doc.exists)
+            {
+              if (doc['organizers'].contains(userId))
+                {
+                  doc.reference.update({
+                    'fullness': value,
+                  })
+                }
+            }
+          else
+            orga.doc(eventId).set({
+              'fullness': value,
+              'organizers': [userId],
+            })
+        });
+  }
 }
 
 class Event {
@@ -123,6 +165,7 @@ class Event {
 
   String locationId;
   GeoPoint location;
+  String address;
 
   List<String> themes;
   String title;
@@ -142,6 +185,7 @@ class Event {
     this.description = json["description"];
     this.descriptionLong = json['description_long'];
     this.image = json['image'];
+    this.address = json['address'];
 
     this.keywords = stringListFromDynamicList(json['keywords']);
 
@@ -202,5 +246,13 @@ class DatesEvent {
   DatesEvent.fromJson(Map json) {
     this.end = json["end"];
     this.start = json["start"];
+  }
+  bool containsDay(DateTime day) {
+    DateTime startBis = start.toDate();
+    DateTime endBis = end.toDate();
+    startBis = DateTime(startBis.year, startBis.month, startBis.day - 1);
+    endBis = DateTime(endBis.year, endBis.month, endBis.day + 1);
+    //print(startBis.toString() + " anddddd " + endBis.toString());
+    return startBis.isBefore(day) && endBis.isAfter(day);
   }
 }

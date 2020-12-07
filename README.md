@@ -31,7 +31,7 @@ Ce sont des données statiques, format libre.
 
 ### Résultat
 
-![](images\img1.png)
+![](images/img1.png)
 
 
 
